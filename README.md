@@ -31,8 +31,6 @@
             opacity: 0.09;
             pointer-events: none;
         }
-
-        /* Login & Overlays */
         #login-overlay, #operator-overlay, #admin-modal {
             position: fixed;
             inset: 0;
@@ -51,7 +49,6 @@
             width: 100%;
             max-width: 420px;
         }
-
         input, button, .op-btn {
             background: transparent;
             border: 2px solid var(--matrix-green);
@@ -64,20 +61,14 @@
             outline: none;
             cursor: pointer;
             display: block;
-            min-height: 48px; /* touch-friendly */
+            min-height: 48px;
             touch-action: manipulation;
         }
         button:hover, .op-btn:hover {
             background: var(--matrix-green);
             color: var(--dark-bg);
         }
-        #login-ok-btn {
-            max-width: 180px;
-            font-size: 18px;
-            padding: 16px;
-        }
-
-        /* Main content */
+        #login-ok-btn { max-width: 180px; font-size: 18px; padding: 16px; }
         #main-content { display: none; }
         .header {
             border: 1px solid var(--matrix-green);
@@ -85,14 +76,9 @@
             margin-bottom: 20px;
             text-align: center;
         }
-        .header h1 { font-size: 1.6rem; margin: 0 0 10px; }
+        .header h1 { font-size: 1.6rem; margin: 0 0 10px; word-break: break-word; }
         .header p { margin: 5px 0; font-size: 1.1rem; }
-
-        .search-box {
-            position: relative;
-            margin: 0 auto 25px;
-            max-width: 100%;
-        }
+        .search-box { position: relative; margin: 0 auto 25px; }
         #searchInput {
             width: 100%;
             padding: 14px;
@@ -102,7 +88,18 @@
             font-size: 1.1rem;
             text-transform: uppercase;
         }
-
+        #suggestions {
+            position: absolute;
+            width: 100%;
+            background: var(--dark-bg);
+            border: 1px solid var(--matrix-green);
+            display: none;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1001;
+        }
+        .suggestion-item { padding: 12px; cursor: pointer; border-bottom: 1px solid var(--dim-green); }
+        .suggestion-item:hover { background: var(--matrix-green); color: var(--dark-bg); }
         .result-card {
             display: none;
             background: var(--dark-bg);
@@ -111,47 +108,57 @@
             margin: 0 auto 25px;
             max-width: 1000px;
         }
-        @media (max-width: 768px) {
-            .result-card { padding: 15px; }
-            .identikit-title { font-size: 1.4rem; padding: 6px 12px; }
-            .data { font-size: 1.05rem; }
-            .doc-content { font-size: 0.95rem; }
-            .action-buttons {
-                flex-direction: column;
-                gap: 12px;
-            }
-            button, .export-btn, .pdf-btn, .edit-btn {
-                width: 100%;
-                font-size: 1.05rem;
-                padding: 14px;
-            }
-        }
-
+        .staff-highlight { border: 4px double var(--matrix-green)!important; background: var(--highlight-bg)!important; }
+        .staff-tag { background: var(--matrix-green); color: var(--dark-bg); padding: 5px 12px; font-weight: bold; margin-bottom: 12px; display: inline-block; }
+        .identikit-title { font-size: 1.6rem; font-weight: bold; margin-bottom: 15px; text-transform: uppercase; background: var(--matrix-green); color: var(--dark-bg); padding: 6px 12px; display: inline-block; }
+        .label { color: var(--matrix-green); opacity: 0.7; font-size: 0.9rem; margin-top: 10px; text-transform: uppercase; }
+        .data { font-size: 1.1rem; margin-bottom: 4px; border-bottom: 1px solid var(--dim-green); padding-bottom: 4px; word-break: break-word; }
+        .doc-section { margin-top: 25px; padding: 15px; border: 1px dashed var(--matrix-green); background: rgba(0,59,0,0.1); }
+        .doc-content { font-size: 0.95rem; line-height: 1.4; white-space: pre-wrap; color: #a0ffa0; }
         .action-buttons {
             margin: 25px 0 15px;
             display: flex;
             justify-content: center;
-            gap: 15px;
+            gap: 12px;
             flex-wrap: wrap;
         }
-
-        /* Inline edit form - più compatto su mobile */
-        .inline-edit-form {
+        .export-btn, .pdf-btn, .edit-btn {
+            min-width: 140px;
+            font-size: 1rem;
+            padding: 12px 20px;
+        }
+        .edit-btn {
+            background: #004d00;
+            border: 2px solid #00ff88;
+            color: #00ff88;
+            font-weight: bold;
+            box-shadow: 0 0 12px rgba(0,255,136,0.4);
+        }
+        .edit-btn:hover { background: #006600; box-shadow: 0 0 20px rgba(0,255,136,0.7); }
+        .edit-btn.active { background: #006600; border-color: #88ffcc; color: #88ffcc; }
+        #cronologia {
+            max-width: 1000px;
+            margin: 30px auto;
+            border: 2px solid var(--matrix-green);
             padding: 15px;
-            border: 2px dashed var(--matrix-green);
-            background: rgba(0,80,0,0.25);
-            margin: 12px 0;
+            background: rgba(0,59,0,0.1);
         }
-        .inline-edit-form textarea {
-            font-size: 0.95rem;
-            min-height: 80px;
+        #admin-modal-content {
+            background: var(--dark-bg);
+            border: 3px solid var(--matrix-green);
+            padding: 20px;
+            width: 100%;
+            max-width: 720px;
         }
-        @media (max-width: 768px) {
-            .inline-edit-form h3 { font-size: 1.2rem; }
-            .inline-edit-form textarea { font-size: 0.9rem; }
+        textarea, input, select {
+            width: 100%;
+            background: var(--dark-bg);
+            border: 1px solid var(--matrix-green);
+            color: var(--matrix-green);
+            padding: 10px;
+            margin: 8px 0;
+            font-family: inherit;
         }
-
-        /* Status bar */
         #status-bar {
             position: fixed;
             bottom: 0; left: 0;
@@ -162,22 +169,29 @@
             text-align: center;
             font-size: 0.85rem;
             z-index: 10000;
-        }
-        @media (max-width: 768px) {
-            #status-bar { font-size: 0.75rem; padding: 6px; }
+            word-break: break-all;
         }
 
-        /* Altri stili invariati (staff-tag, doc-section, ecc.) */
-        .staff-highlight { border: 4px double var(--matrix-green)!important; background: var(--highlight-bg)!important; }
-        .staff-tag { background: var(--matrix-green); color: var(--dark-bg); padding: 5px 12px; font-weight: bold; margin-bottom: 12px; display: inline-block; }
-        .doc-section { margin-top: 25px; padding: 15px; border: 1px dashed var(--matrix-green); background: rgba(0,59,0,0.1); }
-        .suggestions { background: var(--dark-bg); border: 1px solid var(--matrix-green); max-height: 300px; overflow-y: auto; }
+        /* Mobile adjustments */
+        @media (max-width: 768px) {
+            body { padding: 8px; font-size: 0.95rem; }
+            .login-box { padding: 25px 15px; }
+            .header h1 { font-size: 1.4rem; }
+            .header p { font-size: 1rem; }
+            .result-card { padding: 15px; }
+            .identikit-title { font-size: 1.3rem; }
+            .data { font-size: 1rem; }
+            .doc-content { font-size: 0.9rem; }
+            .action-buttons { flex-direction: column; gap: 10px; }
+            .export-btn, .pdf-btn, .edit-btn { width: 100%; font-size: 1.05rem; padding: 14px; min-width: auto; }
+            .inline-edit-form textarea { font-size: 0.9rem; min-height: 70px; }
+            #status-bar { font-size: 0.75rem; padding: 6px; }
+        }
     </style>
 </head>
 <body>
     <canvas id="matrix-bg"></canvas>
 
-    <!-- Login overlay -->
     <div id="login-overlay">
         <div class="login-box">
             <h2>INTELLIGENCE ARCHIVE SYSTEM v6.2</h2>
@@ -189,7 +203,6 @@
         </div>
     </div>
 
-    <!-- Operator selection -->
     <div id="operator-overlay" style="display:none;">
         <div class="login-box">
             <h2>IDENTIFICAZIONE OPERATORE</h2>
@@ -204,7 +217,6 @@
         </div>
     </div>
 
-    <!-- Main interface -->
     <div id="main-content">
         <div class="header">
             <h1>INTELLIGENCE TERMINAL v6.2 - BORIS MODE</h1>
@@ -229,7 +241,6 @@
         </div>
     </div>
 
-    <!-- Admin modal (rimane quasi invariato) -->
     <div id="admin-modal" style="display:none;">
         <div id="admin-modal-content">
             <h2>🛠 ADMIN PANEL v6.2</h2>
@@ -252,23 +263,18 @@
     </div>
 
     <script>
-        // MATRIX RAIN (invariato)
+        // MATRIX RAIN
         const canvas = document.getElementById('matrix-bg');
         const ctx = canvas.getContext('2d');
-        function resizeCanvas() {
-            canvas.height = window.innerHeight;
-            canvas.width = window.innerWidth;
-        }
+        function resizeCanvas() { canvas.height = window.innerHeight; canvas.width = window.innerWidth; }
         resizeCanvas();
         window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('orientationchange', resizeCanvas);
         const chars = "01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワン0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ█▓▒░";
-        const fontSize = 14;
-        let drops = Array(Math.floor(canvas.width / fontSize)).fill(1);
+        const fontSize = 14; let drops = Array(Math.floor(canvas.width / fontSize)).fill(1);
         function drawMatrix() {
-            ctx.fillStyle = 'rgba(0,0,0,0.05)';
-            ctx.fillRect(0,0,canvas.width,canvas.height);
-            ctx.fillStyle = '#00ff41';
-            ctx.font = fontSize + 'px monospace';
+            ctx.fillStyle = 'rgba(0,0,0,0.05)'; ctx.fillRect(0,0,canvas.width,canvas.height);
+            ctx.fillStyle = '#00ff41'; ctx.font = fontSize + 'px monospace';
             for (let i = 0; i < drops.length; i++) {
                 const text = chars[Math.floor(Math.random() * chars.length)];
                 ctx.fillText(text, i * fontSize, drops[i] * fontSize);
@@ -278,9 +284,360 @@
         }
         setInterval(drawMatrix, 35);
 
-        // Il resto del JavaScript (login, soggetti, editing inline, renderAllCards, ecc.)
-        // ... copia qui tutto il codice JavaScript dalla versione precedente che funzionava (quella con editing inline corretto)
-        // Per brevità non lo riscrivo tutto qui, ma assicurati di tenere le versioni corrette di saveInlineEdit e renderAllCards che ti ho dato nell'ultimo messaggio
+        // LOG + LOGIN
+        let accessLog = JSON.parse(localStorage.getItem('accessLog')) || [];
+        function logAccess(op) {
+            const now = new Date();
+            const ts = now.toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric'}) + ' ' + now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+            accessLog.unshift(`${ts} → ${op}`);
+            if(accessLog.length>50) accessLog.pop();
+            localStorage.setItem('accessLog',JSON.stringify(accessLog));
+            renderCronologia();
+        }
+        function renderCronologia() {
+            document.getElementById('cronologia-list').innerHTML = accessLog.map(e=>`<div>${e}</div>`).join('') || '<div style="opacity:0.5;text-align:center;">Nessun accesso</div>';
+        }
+        function exportLog() {
+            if(!accessLog.length) return;
+            const blob = new Blob(["CRONOLOGIA v6.2 BORIS\n\n"+accessLog.join("\n")],{type:"text/plain"});
+            const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`CRONOLOGIA_${new Date().toISOString().slice(0,10)}.txt`; a.click();
+        }
+        function clearLog() {
+            if(confirm("CANCELLARE TUTTA LA CRONOLOGIA?")) { accessLog=[]; localStorage.setItem('accessLog',JSON.stringify(accessLog)); renderCronologia(); }
+        }
+        let currentOperator = '';
+        function updateLoggedAs() { document.getElementById('logged-as').innerText = `LOGGED AS: ${currentOperator}`; }
+        function checkPass() {
+            const input = document.getElementById('passInput');
+            if (input.value === "2011") {
+                document.getElementById('login-overlay').style.display = 'none';
+                document.getElementById('operator-overlay').style.display = 'flex';
+                input.value = '';
+            } else {
+                document.getElementById('error-msg').style.display = 'block';
+            }
+        }
+        function selectOperator(name){
+            currentOperator = name; logAccess(name); updateLoggedAs();
+            document.getElementById('operator-overlay').style.display = 'none';
+            document.getElementById('main-content').style.display = 'block';
+            document.body.style.overflow = 'auto';
+        }
+        function showCustomInput(){ document.getElementById('custom-input').style.display = 'block'; }
+        function confirmCustom(){
+            const v = document.getElementById('customOperator').value.trim();
+            if(v){
+                currentOperator = v.toUpperCase(); logAccess(currentOperator); updateLoggedAs();
+                document.getElementById('operator-overlay').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+            }
+        }
+        function reopenOperator(){ document.getElementById('operator-overlay').style.display = 'flex'; }
+        function resetDatabase() {
+            if(confirm("RESETTARE TUTTO IL DATABASE AI VALORI ORIGINALI?")) {
+                localStorage.removeItem('soggetti');
+                localStorage.removeItem('accessLog');
+                location.reload();
+            }
+        }
+
+        // DATABASE SOGGETTI
+        let soggetti = JSON.parse(localStorage.getItem('soggetti')) || [
+            { nome: "NIR.D", id: "card-nir", isStaff: true, ruolo: "HACKER / INTELLIGENCE", info: { GRADO: "OPERATORE ALPHA", SPECIALITÀ: "HACKING & TRACCIAMENTO", STATUS: "ATTIVO" }, doc: "RESPONSABILE SICUREZZA DIGITALE.\nHa gestito il tracciamento IP 151.16.25.87 e l'analisi dei metadati per l'operazione L.M. (Lorenzo Magliaccio).", pdfs: [{title:"Profilo NIR 05", content:"NIR 05\nEtà ufficiale: 13\nEtà percepita: 12\nMaturità: basso\nSesso: M\nNucleo centrale: calmo\nCosa piace: tecnologia"}] },
+            { nome: "PASIN 04", id: "card-pasin", isStaff: true, ruolo: "SCIENTIFICA", info: { RUOLO: "TECNICO SCIENTIFICO", ETÀ: "14 ANNI", MATURITÀ: "STABILE" }, doc: "ANALISI DATI VITALI.\nParte della squadra che ha effettuato il riscontro visivo a Chiuppano.", pdfs: [{title:"Profilo PASIN 04", content:"PASIN 04\nEtà ufficiale: 13\nEtà percepita: 12\nMaturità: medio/alto\nSesso: M\nNucleo centrale: calmo e concentrato"}] },
+            { nome: "ADAM GRITCAN", id: "card-adam", info: { ETÀ: "13 ANNI", LIVELLO: "1", IP: "151.16.25.87", MISSIONE: "RACCOLTA IMPRONTE" }, doc: "DOSSIER: Investigazione avviata per offese gratuite. Tracciamento digitale prioritario.", pdfs: [{title:"Lista IP Pubblici", content:"1- Adam Gritcan livello1 151.16.25.87\n2- Emily Mucca livello 2 in ricerca..\n3-Noemi de russi livello 2 /"},{title:"Lista Progetti", content:"Adam Gritcan 13 chiarire offese gratuite ecc.. livello 1"}] },
+            { nome: "LORENZO MAGLIACCIO", id: "card-lorenzo", info: { RESIDENZA: "VIA ALBERI 21, CHIUPPANO", COORDINATE: "45.7605108, 11.4644352", STATUS: "IDENTIFICATO" }, doc: "CONCLUSIONE OPERAZIONE: Individuato a Chiuppano. Osservata attività sociale con Emily Mucca. Località: Casa Gialla.", pdfs: [{title:"Rapporto Investigativo L.M. (9/2/26)", content:"9/2/26\nRAPPORTO INVESTIGATIVO “L.M.”\nSoggetto: Lorenzo Magliaccio\nLocation: Chiuppano (VI)\nEtà: 14 anni\nRelazione: attuale con Emily Mucca"}] },
+            { nome: "NOEMI DERUSSI", id: "card-noemi", info: { ETÀ: "13 ANNI", LIVELLO: "2", CARATTERE: "IMPULSIVA / CALDA", FORZA: "DETERMINATA" }, doc: "NOTE: Profilo psicologico attivo. Obiettivo Livello 2: Individuazione abitazione.", pdfs: [{title:"Lista IP", content:"3-Noemi de russi livello 2 /"},{title:"Lista Progetti", content:"derussi noemi 12 trovare abitazione livello 2"},{title:"Profilo NOEMI 01", content:"NOEMI 01\nEtà ufficiale: 13\nNucleo centrale: caldo e impulsiva\nForza: determinata, curiosa"}] },
+            { nome: "PAOLO 02", id: "card-paolo", info: { ETÀ: "48 ANNI", CARATTERE: "ESPRESSIVO / CALMO", PIACE: "FAMIGLIA, VIOLENZA", FORZA: "CALMA" }, doc: "PROFILO: Stato emotivo registrato come 'basso'. Bassissimo livello di tolleranza verso il disordine.", pdfs: [{title:"Profilo PAOLO 02", content:"PAOLO 02\nEtà ufficiale: 48\nNucleo centrale: espressivo e calmo\nCosa piace: famiglia, violenza\nCosa non piace: disordine"}] },
+            { nome: "BARBARA 03", id: "card-barbara", info: { ETÀ: "51 ANNI", CARATTERE: "ESPRESSIVO", DEBOLEZZA: "NON SA ASCOLTARE", FORZA: "DETERMINATA" }, doc: "PROFILO: Nucleo centrale espressivo. Stato emotivo poco controllato. Pazienza: Bassa.", pdfs: [{title:"Profilo BARBARA 03", content:"BARBARA 03\nEtà ufficiale: 51\nNucleo centrale: espressivo\nLivello di pazienza: basso"}] },
+            { nome: "EMILY MUCCA", id: "card-emily", info: { ETÀ: "12 ANNI", RELAZIONE: "LORENZO MAGLIACCIO", STATUS: "MONITORATA" }, doc: "NOTA: Presenza rilevata a Chiuppano con il bersaglio primario. Febbraio 2026.", pdfs: [{title:"Lista IP", content:"2- Emily Mucca livello 2 in ricerca.."},{title:"Lista Progetti", content:"emily mucca 12 raccogliere impornti digitali livello 2"},{title:"Profilo EMILY 16", content:"EMILY 16\nEtà ufficiale: 13\nStato emotivo: felice\nDinamica sociale: isolata"}] },
+            { nome: "SERENA 14", id: "card-serena", info: { ETÀ: "12 ANNI (PERC. 11)", STATO: "TRISTE", SOCIAL: "ISOLATA" }, doc: "NOTE: Nucleo centrale 'far finto'. Carattere instabile. Minimo supporto sociale.", pdfs: [{title:"Profilo SERENA 14", content:"SERENA 14\nEtà ufficiale: 12\nEtà percepita: 11\nStato emotivo: abbastanza triste"}] },
+            { nome: "MICHELE 13", id: "card-michele", info: { ETÀ: "18 ANNI", STATO_EMOTIVO: "ANZIANO", PAZIENZA: "ALTO" }, doc: "NOTE: Nucleo centrale stabile. Alta maturità cognitiva rispetto all'età anagrafica.", pdfs: [{title:"Profilo MICHELE 13", content:"MICHELE 13\nEtà ufficiale: 18\nStato emotivo: anziano\nLivello di pazienza: alto"}] },
+            { nome: "LUISELLA 12", id: "card-luisella", info: { ETÀ: "65 ANNI", MATURITÀ: "ALTA", INTERESSI: "RAGAZZI INTRAPRENDENTI" }, doc: "PROFILO: Nucleo sensibile, stato emotivo coerente con le interazioni rilevate.", pdfs: [{title:"Profilo LUISELLA 12", content:"LUISELLA 12\nEtà ufficiale: 65\nMaturità: alta\nPSICHE\nCosa piace: ragazzi intraprendenti"}] }
+        ];
+        if (soggetti.length < 11) localStorage.setItem('soggetti', JSON.stringify(soggetti));
+
+        function saveSoggetti() {
+            localStorage.setItem('soggetti', JSON.stringify(soggetti));
+            renderAllCards();
+        }
+
+        // EDITING INLINE
+        let editingCardId = null;
+
+        function toggleEditMode(id) {
+            const card = document.getElementById(id);
+            if (!card) return;
+
+            if (editingCardId === id) {
+                saveInlineEdit(id);
+                return;
+            }
+
+            if (editingCardId) cancelInlineEdit(editingCardId);
+            editingCardId = id;
+
+            const subj = soggetti.find(s => s.id === id);
+            if (!subj) return;
+
+            card.querySelectorAll('.label, .data, .doc-section, .action-buttons > *:not(.edit-btn)').forEach(el => el.style.display = 'none');
+
+            let infoLines = '';
+            if (subj.info) Object.entries(subj.info).forEach(([k,v]) => infoLines += `${k}: ${v}\n`);
+
+            const editFormHtml = `
+                <div class="inline-edit-form" style="padding:15px; border:2px dashed var(--matrix-green); background:rgba(0,80,0,0.25); margin:12px 0;">
+                    <h3 style="margin:0 0 12px 0; color:#88ffcc; text-align:center; font-size:1.2rem;">MODIFICA ${subj.nome}</h3>
+                    <label style="font-size:0.9rem; opacity:0.8;">NOME COMPLETO</label><br>
+                    <input type="text" id="inline-nome-${id}" value="${(subj.nome || '').replace(/"/g,'&quot;')}" style="width:100%; font-size:1rem;"><br><br>
+                    <label style="font-size:0.9rem; opacity:0.8;">
+                        <input type="checkbox" id="inline-staff-${id}" ${subj.isStaff ? 'checked' : ''}> STAFF
+                    </label><br>
+                    <div id="staff-role-${id}" style="display:${subj.isStaff ? 'block' : 'none'}; margin:10px 0;">
+                        <label style="font-size:0.9rem; opacity:0.8;">RUOLO</label><br>
+                        <input type="text" id="inline-ruolo-${id}" value="${(subj.ruolo || '').replace(/"/g,'&quot;')}" style="width:100%;">
+                    </div>
+                    <label style="font-size:0.9rem; opacity:0.8; display:block; margin-top:12px;">INFO (CHIAVE: valore)</label>
+                    <textarea id="inline-info-${id}" rows="6" style="width:100%; font-size:0.95rem;">${infoLines.trim()}</textarea><br><br>
+                    <label style="font-size:0.9rem; opacity:0.8; display:block;">RAPPORTO</label>
+                    <textarea id="inline-doc-${id}" rows="8" style="width:100%; font-size:0.95rem;">${(subj.doc || '').replace(/"/g,'&quot;')}</textarea><br><br>
+                    <div style="text-align:center; margin-top:15px;">
+                        <button onclick="saveInlineEdit('${id}')" style="background:#004d00; border:2px solid #88ffcc; color:#88ffcc; padding:12px 25px; font-size:1rem; min-width:140px;">SALVA</button>
+                        <button onclick="cancelInlineEdit('${id}')" style="margin-left:15px; background:#330000; border:2px solid #ff6666; color:#ff9999; padding:12px 25px; font-size:1rem; min-width:140px;">ANNULLA</button>
+                    </div>
+                </div>
+            `;
+
+            card.querySelector('.identikit-title').insertAdjacentHTML('afterend', editFormHtml);
+
+            const staffCheck = document.getElementById(`inline-staff-${id}`);
+            if (staffCheck) {
+                staffCheck.addEventListener('change', () => {
+                    const roleDiv = document.getElementById(`staff-role-${id}`);
+                    if (roleDiv) roleDiv.style.display = staffCheck.checked ? 'block' : 'none';
+                });
+            }
+
+            const editBtn = card.querySelector('.edit-btn');
+            if (editBtn) {
+                editBtn.textContent = '💾 SALVA';
+                editBtn.classList.add('active');
+            }
+        }
+
+        function saveInlineEdit(id) {
+            const subjIndex = soggetti.findIndex(s => s.id === id);
+            if (subjIndex === -1) return;
+
+            const nome = document.getElementById(`inline-nome-${id}`)?.value?.trim();
+            if (!nome) { alert("❌ Nome obbligatorio!"); return; }
+
+            const isStaff = document.getElementById(`inline-staff-${id}`)?.checked ?? false;
+            let ruolo = undefined;
+            if (isStaff) {
+                ruolo = document.getElementById(`inline-ruolo-${id}`)?.value?.trim() || 'OPERATORE';
+            }
+
+            const infoText = document.getElementById(`inline-info-${id}`)?.value?.trim() || '';
+            const infoObj = {};
+            infoText.split('\n').forEach(line => {
+                line = line.trim();
+                if (line && line.includes(':')) {
+                    const [key, ...val] = line.split(':');
+                    const k = key.trim().toUpperCase();
+                    if (k) infoObj[k] = val.join(':').trim();
+                }
+            });
+
+            const doc = document.getElementById(`inline-doc-${id}`)?.value?.trim() || '';
+
+            soggetti[subjIndex] = {
+                ...soggetti[subjIndex],
+                nome,
+                isStaff,
+                ruolo,
+                info: Object.keys(infoObj).length ? infoObj : undefined,
+                doc: doc || undefined
+            };
+
+            editingCardId = null;
+            saveSoggetti();
+            alert("✅ Salvato");
+        }
+
+        function cancelInlineEdit(id) {
+            editingCardId = null;
+            renderAllCards();
+        }
+
+        function renderAllCards() {
+            editingCardId = null;
+            const container = document.getElementById('cards-container');
+            container.innerHTML = '';
+            soggetti.forEach(s => {
+                let infoHtml = '';
+                if (s.info) Object.entries(s.info).forEach(([k,v]) => infoHtml += `<div class="label">${k}:</div><div class="data">${v}</div>`);
+                const staffClass = s.isStaff ? 'staff-highlight' : '';
+                const staffTag = s.isStaff ? `<div class="staff-tag">[ AGENTE: ${s.ruolo || 'OPERATORE'} ]</div>` : '';
+                let pdfHtml = s.pdfs ? s.pdfs.map(p => 
+                    `<button onclick="openAsPdf('${p.title}', \`${p.content.replace(/`/g,'\\`')}\`)" class="pdf-btn">📄 ${p.title}</button>`
+                ).join('') : '';
+
+                container.innerHTML += `
+                    <div class="result-card ${staffClass}" id="${s.id}">
+                        ${staffTag}
+                        <div class="identikit-title">FILE ID: ${s.nome}</div>
+                        ${infoHtml}
+                        <div class="doc-section">
+                            <div class="doc-header">RAPPORTO TECNICO-INVESTIGATIVO</div>
+                            <div class="doc-content">${s.doc || '[NESSUN RAPPORTO]'}</div>
+                        </div>
+                        <div class="action-buttons">
+                            <button onclick="exportDossier('${s.id}')" class="export-btn">📤 ESPORTA TXT</button>
+                            <button onclick="toggleDossier('${s.id}')" class="pdf-btn">📑 ALLEGATI</button>
+                            <button onclick="toggleEditMode('${s.id}')" class="export-btn edit-btn">✏️ MODIFICA</button>
+                        </div>
+                        <div id="dossier-${s.id}" style="display:none; margin-top:20px; border:2px solid var(--matrix-green); padding:15px;">
+                            ${pdfHtml || '<div style="opacity:0.6; text-align:center;">Nessun allegato</div>'}
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function showAllCards() { document.querySelectorAll('.result-card').forEach(c => c.style.display = 'block'); }
+        function hideAllCards() { document.querySelectorAll('.result-card').forEach(c => c.style.display = 'none'); }
+
+        function handleInput() {
+            const q = document.getElementById('searchInput').value.toUpperCase().trim();
+            const box = document.getElementById('suggestions');
+            box.innerHTML = '';
+            const matches = soggetti.filter(s => 
+                (s.nome || '').toUpperCase().includes(q) ||
+                JSON.stringify(s.info||{}).toUpperCase().includes(q) ||
+                (s.doc||'').toUpperCase().includes(q)
+            );
+
+            if (q.length === 0) {
+                box.style.display = 'block';
+                soggetti.forEach(m => {
+                    const item = document.createElement('div');
+                    item.className = 'suggestion-item';
+                    item.innerText = m.isStaff ? `⚡ ${m.nome}` : `👤 ${m.nome}`;
+                    item.onclick = () => { document.getElementById('searchInput').value = m.nome; handleInput(); box.style.display = 'none'; };
+                    box.appendChild(item);
+                });
+            } else if (matches.length) {
+                box.style.display = 'block';
+                matches.forEach(m => {
+                    const item = document.createElement('div');
+                    item.className = 'suggestion-item';
+                    item.innerText = m.isStaff ? `⚡ ${m.nome}` : `👤 ${m.nome}`;
+                    item.onclick = () => { document.getElementById('searchInput').value = m.nome; handleInput(); box.style.display = 'none'; };
+                    box.appendChild(item);
+                });
+            } else {
+                box.style.display = 'none';
+            }
+
+            hideAllCards();
+            (q.length === 0 ? soggetti : matches).forEach(m => {
+                const card = document.getElementById(m.id);
+                if (card) card.style.display = 'block';
+            });
+        }
+
+        function exportDossier(id) {
+            const card = document.getElementById(id);
+            const nome = card.querySelector('.identikit-title').innerText.replace('FILE ID: ','');
+            let txt = `INTELLIGENCE TERMINAL v6.2\nFILE: ${nome}\n\n`;
+            card.querySelectorAll('.label').forEach((l,i) => {
+                txt += `${l.innerText} ${card.querySelectorAll('.data')[i].innerText}\n`;
+            });
+            txt += `\nRAPPORTO:\n${card.querySelector('.doc-content').innerText}`;
+            const blob = new Blob([txt], {type:'text/plain'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `DOSSIER_${nome.replace(/ /g,'_')}.txt`;
+            a.click();
+        }
+
+        function openAsPdf(title, content){
+            const w = window.open('','_blank');
+            w.document.write(`<html><head><title>${title}</title><style>body{background:#000;color:#00ff41;font-family:Courier New;padding:20px;}</style></head><body><h1>${title}</h1><pre>${content}</pre></body></html>`);
+            w.document.close();
+        }
+
+        function toggleDossier(id){
+            const d = document.getElementById('dossier-'+id);
+            d.style.display = d.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function showAdminModal() {
+            const select = document.getElementById('edit-select');
+            select.innerHTML = '<option value="">-- SELEZIONA --</option><option value="NEW">➕ NUOVO</option>';
+            soggetti.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.id;
+                opt.textContent = s.nome;
+                select.appendChild(opt);
+            });
+            document.getElementById('edit-nome').value = '';
+            document.getElementById('edit-id').value = '';
+            document.getElementById('edit-staff').checked = false;
+            document.getElementById('edit-ruolo').value = '';
+            document.getElementById('edit-info').value = '';
+            document.getElementById('edit-doc').value = '';
+            document.getElementById('admin-modal').style.display = 'flex';
+        }
+
+        function loadForEdit() {
+            const val = document.getElementById('edit-select').value;
+            if (!val || val === "NEW") {
+                document.getElementById('edit-nome').value = '';
+                document.getElementById('edit-id').value = val === "NEW" ? 'card-nuovo-' + Date.now().toString().slice(-6) : '';
+                document.getElementById('edit-staff').checked = false;
+                document.getElementById('edit-ruolo').value = '';
+                document.getElementById('edit-info').value = '';
+                document.getElementById('edit-doc').value = '';
+                return;
+            }
+            const subj = soggetti.find(s => s.id === val);
+            if (!subj) return;
+            document.getElementById('edit-nome').value = subj.nome || '';
+            document.getElementById('edit-id').value = subj.id || '';
+            document.getElementById('edit-staff').checked = !!subj.isStaff;
+            document.getElementById('edit-ruolo').value = subj.ruolo || '';
+            let infoStr = '';
+            if (subj.info) Object.entries(subj.info).forEach(([k,v]) => infoStr += `${k}: ${v}\n`);
+            document.getElementById('edit-info').value = infoStr.trim();
+            document.getElementById('edit-doc').value = subj.doc || '';
+        }
+
+        function saveSubject() {
+            let id = document.getElementById('edit-id').value.trim();
+            let nome = document.getElementById('edit-nome').value.trim();
+            if (!id || !nome) { alert('❌ ID e Nome obbligatori!'); return; }
+            let index = soggetti.findIndex(s => s.id === id);
+            let isNew = index === -1;
+            let subj = isNew ? { id, pdfs: [] } : soggetti[index];
+            subj.nome = nome;
+            subj.isStaff = document.getElementById('edit-staff').checked;
+            if (subj.isStaff) subj.ruolo = document.getElementById('edit-ruolo').value.trim() || 'OPERATORE';
+            else delete subj.ruolo;
+            subj.info = {};
+            document.getElementById('edit-info').value.trim().split('\n').forEach(line => {
+                if (line.includes(':')) {
+                    const [key, ...val] = line.split(':');
+                    if (key.trim()) subj.info[key.trim().toUpperCase()] = val.join(':').trim();
+                }
+            });
+            subj.doc = document.getElementById('edit-doc').value.trim();
+            saveSoggetti();
+            alert(`✅ ${isNew ? 'Creato' : 'Modificato'}!`);
+            document.getElementById('admin-modal').style.display = 'none';
+        }
+
+        function closeAdminModal() { document.getElementById('admin-modal').style.display = 'none'; }
 
         // AVVIO
         renderAllCards();
@@ -293,9 +650,6 @@
             }, 1000);
         }
         updateStatus();
-
-        // Aggiunta resize per matrix rain su orientation change (mobile)
-        window.addEventListener('orientationchange', resizeCanvas);
     </script>
 </body>
 </html>
