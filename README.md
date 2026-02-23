@@ -24,11 +24,11 @@
         .staff-tag { background:var(--matrix-green); color:var(--dark-bg); padding:5px 15px; font-weight:bold; margin-bottom:15px; display:inline-block; }
         .identikit-title { font-size:26px; font-weight:bold; margin-bottom:25px; text-transform:uppercase; background:var(--matrix-green); color:var(--dark-bg); padding:5px 15px; display:inline-block; }
         .label { color:var(--matrix-green); opacity:0.6; font-size:11px; margin-top:15px; text-transform:uppercase; }
-        .data { font-size:20px; margin-bottom:5px; border-bottom:1px solid var(--dim-green); padding-bottom:5px; outline: none; }
-        .data:focus { background: var(--highlight-bg); }
+        .data { font-size:20px; margin-bottom:5px; border-bottom:1px solid var(--dim-green); padding-bottom:5px; }
         .doc-section { margin-top:40px; padding:25px; border:1px dashed var(--matrix-green); background:rgba(0,59,0,0.1); }
-        .doc-content { font-size:14px; line-height:1.5; white-space:pre-wrap; color:#a0ffa0; outline: none; }
-        .doc-content:focus { background: var(--highlight-bg); }
+        .doc-content { font-size:14px; line-height:1.5; white-space:pre-wrap; color:#a0ffa0; }
+        button { background:transparent; border:2px solid var(--matrix-green); color:var(--matrix-green); padding:12px 25px; margin:8px 5px; font-size:16px; cursor:pointer; }
+        button:hover { background:var(--matrix-green); color:var(--dark-bg); box-shadow:0 0 15px var(--matrix-green); }
         .action-buttons { margin: 35px 0 15px; display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
         .export-btn, .pdf-btn { min-width: 160px; }
         .edit-btn { 
@@ -39,14 +39,11 @@
             font-weight: bold; 
             box-shadow: 0 0 12px rgba(0,255,136,0.4); 
         }
-        .quick-save-btn {
-            background: var(--matrix-green) !important;
-            color: black !important;
-            font-weight: bold;
-        }
+        .edit-btn:hover { background: #006600; box-shadow: 0 0 20px rgba(0,255,136,0.7); }
         #cronologia { max-width:1000px; margin:40px auto; border:2px solid var(--matrix-green); padding:25px; background:rgba(0,59,0,0.1); }
         #admin-modal-content { background:var(--dark-bg); border:3px solid var(--matrix-green); padding:30px; width:90%; max-width:720px; }
         textarea, input { width:100%; background:var(--dark-bg); border:1px solid var(--matrix-green); color:var(--matrix-green); padding:10px; margin:8px 0; font-family:inherit; box-sizing:border-box; }
+        select { width:100%; background:var(--dark-bg); border:1px solid var(--matrix-green); color:var(--matrix-green); padding:10px; margin:8px 0; }
         #status-bar { position:fixed; bottom:0; left:0; width:100%; background:rgba(0,0,0,0.95); border-top:2px solid var(--matrix-green); padding:10px; text-align:center; font-size:13px; z-index:10000; }
     </style>
 </head>
@@ -93,7 +90,7 @@
         <div id="cards-container"></div>
 
         <div id="cronologia">
-            <h2>CRONOLOGIA ACCESSI E MODIFICHE</h2>
+            <h2>CRONOLOGIA ACCESSI</h2>
             <button onclick="exportLog()" class="export-btn">📤 ESPORTA TXT</button>
             <button onclick="clearLog()" class="export-btn" style="margin-left:10px;">🗑 CANCELLA</button>
             <div id="cronologia-list"></div>
@@ -103,8 +100,7 @@
     <div id="admin-modal" style="display:none;">
         <div id="admin-modal-content">
             <h2>🛠 ADMIN PANEL v6.2</h2>
-            <select id="edit-select" onchange="loadForEdit()" style="width:100%; background:black; color:var(--matrix-green); padding:10px; border:1px solid var(--matrix-green);">
-            </select><br><br>
+            <select id="edit-select" onchange="loadForEdit()"></select><br><br>
             
             <input type="text" id="edit-nome" placeholder="NOME COMPLETO"><br>
             <input type="text" id="edit-id" placeholder="ID (es. card-nuovo)"><br>
@@ -130,7 +126,7 @@
         const ctx = canvas.getContext('2d');
         function resizeCanvas() { canvas.height = window.innerHeight; canvas.width = window.innerWidth; }
         resizeCanvas(); window.addEventListener('resize', resizeCanvas);
-        const chars = "01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホ마미무메모ヤユヨ라릴레로완0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ█▓▒░";
+        const chars = "01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワン0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ█▓▒░";
         const fontSize = 14; let drops = Array(Math.floor(canvas.width / fontSize)).fill(1);
         function drawMatrix() {
             ctx.fillStyle = 'rgba(0,0,0,0.05)'; ctx.fillRect(0,0,canvas.width,canvas.height);
@@ -144,28 +140,75 @@
         }
         setInterval(drawMatrix, 35);
 
-        // DATABASE E LOGICA
-        let soggetti = JSON.parse(localStorage.getItem('soggetti')) || [
-            { nome: "NIR.D", id: "card-nir", isStaff: true, ruolo: "HACKER / INTELLIGENCE", info: { GRADO: "OPERATORE ALPHA", SPECIALITÀ: "HACKING & TRACCIAMENTO", STATUS: "ATTIVO" }, doc: "RESPONSABILE SICUREZZA DIGITALE.\nHa gestito il tracciamento IP 151.16.25.87 e l'analisi dei metadati.", pdfs: [{title:"Profilo NIR 05", content:"NIR 05\nMaturità: basso\nSesso: M"}] },
-            { nome: "ADAM GRITCAN", id: "card-adam", info: { ETÀ: "13 ANNI", LIVELLO: "1", IP: "151.16.25.87", MISSIONE: "RACCOLTA IMPRONTE" }, doc: "DOSSIER: Investigazione avviata per offese gratuite. Tracciamento digitale prioritario.", pdfs: [{title:"Lista IP", content:"151.16.25.87"}] },
-            { nome: "LORENZO MAGLIACCIO", id: "card-lorenzo", info: { RESIDENZA: "VIA ALBERI 21, CHIUPPANO", STATUS: "IDENTIFICATO" }, doc: "Località: Casa Gialla." }
-        ];
-
+        // LOG + LOGIN
         let accessLog = JSON.parse(localStorage.getItem('accessLog')) || [];
-        let currentOperator = 'SCONOSCIUTO';
-
-        function logAccess(msg) { 
+        function logAccess(op) { 
             const now = new Date(); 
-            const ts = now.toLocaleDateString('it-IT') + ' ' + now.toLocaleTimeString('it-IT');
-            accessLog.unshift(`${ts} → ${msg}`); 
+            const ts = now.toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric'}) + ' ' + now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+            accessLog.unshift(`${ts} → ${op}`); 
             if(accessLog.length>50) accessLog.pop(); 
             localStorage.setItem('accessLog',JSON.stringify(accessLog)); 
             renderCronologia(); 
         }
-
         function renderCronologia() { 
-            document.getElementById('cronologia-list').innerHTML = accessLog.map(e=>`<div>${e}</div>`).join('') || '<div>Nessuna attività</div>'; 
+            document.getElementById('cronologia-list').innerHTML = accessLog.map(e=>`<div>${e}</div>`).join('') || '<div style="opacity:0.5;text-align:center;">Nessun accesso</div>'; 
         }
+        function exportLog() { 
+            if(!accessLog.length) return; 
+            const blob=new Blob(["CRONOLOGIA v6.2 BORIS\n\n"+accessLog.join("\n")],{type:"text/plain"}); 
+            const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`CRONOLOGIA_${new Date().toISOString().slice(0,10)}.txt`; a.click(); 
+        }
+        function clearLog() { 
+            if(confirm("CANCELLARE TUTTA LA CRONOLOGIA?")) { accessLog=[]; localStorage.setItem('accessLog',JSON.stringify(accessLog)); renderCronologia(); } 
+        }
+
+        let currentOperator = '';
+        function updateLoggedAs() { document.getElementById('logged-as').innerText = `LOGGED AS: ${currentOperator}`; }
+        function checkPass() { 
+            if(document.getElementById('passInput').value==="2011"){ 
+                document.getElementById('login-overlay').style.display='none'; 
+                document.getElementById('operator-overlay').style.display='flex'; 
+            } else { 
+                document.getElementById('error-msg').style.display='block'; 
+            }
+        }
+        function selectOperator(name){ 
+            currentOperator=name; logAccess(name); updateLoggedAs(); 
+            document.getElementById('operator-overlay').style.display='none'; 
+            document.getElementById('main-content').style.display='block'; 
+            document.body.style.overflow='auto'; 
+        }
+        function showCustomInput(){ document.getElementById('custom-input').style.display='block'; }
+        function confirmCustom(){ 
+            const v=document.getElementById('customOperator').value.trim(); 
+            if(v){ currentOperator=v.toUpperCase(); logAccess(currentOperator); updateLoggedAs(); 
+            document.getElementById('operator-overlay').style.display='none'; 
+            document.getElementById('main-content').style.display='block'; }
+        }
+        function reopenOperator(){ document.getElementById('operator-overlay').style.display='flex'; }
+        function resetDatabase() {
+            if(confirm("RESETTARE TUTTO IL DATABASE AI VALORI ORIGINALI?")) {
+                localStorage.removeItem('soggetti');
+                location.reload();
+            }
+        }
+
+        let soggetti = JSON.parse(localStorage.getItem('soggetti')) || [
+            { nome: "NIR.D", id: "card-nir", isStaff: true, ruolo: "HACKER / INTELLIGENCE", info: { GRADO: "OPERATORE ALPHA", SPECIALITÀ: "HACKING & TRACCIAMENTO", STATUS: "ATTIVO" }, doc: "RESPONSABILE SICUREZZA DIGITALE.\nHa gestito il tracciamento IP 151.16.25.87 e l'analisi dei metadati per l'operazione L.M. (Lorenzo Magliaccio).", pdfs: [{title:"Profilo NIR 05", content:"NIR 05\nEtà ufficiale: 13\nEtà percepita: 12\nMaturità: basso\nSesso: M\nNucleo centrale: calmo\nCosa piace: tecnologia"}] },
+            { nome: "PASIN 04", id: "card-pasin", isStaff: true, ruolo: "SCIENTIFICA", info: { RUOLO: "TECNICO SCIENTIFICO", ETÀ: "14 ANNI", MATURITÀ: "STABILE" }, doc: "ANALISI DATI VITALI.\nParte della squadra che ha effettuato il riscontro visivo a Chiuppano.", pdfs: [{title:"Profilo PASIN 04", content:"PASIN 04\nEtà ufficiale: 13\nEtà percepita: 12\nMaturità: medio/alto\nSesso: M\nNucleo centrale: calmo e concentrato"}] },
+            { nome: "ADAM GRITCAN", id: "card-adam", info: { ETÀ: "13 ANNI", LIVELLO: "1", IP: "151.16.25.87", MISSIONE: "RACCOLTA IMPRONTE" }, doc: "DOSSIER: Investigazione avviata per offese gratuite. Tracciamento digitale prioritario.", pdfs: [{title:"Lista IP Pubblici", content:"1- Adam Gritcan livello1 151.16.25.87\n2- Emily Mucca livello 2 in ricerca..\n3-Noemi de russi livello 2 /"},{title:"Lista Progetti", content:"Adam Gritcan 13 chiarire offese gratuite ecc.. livello 1"}] },
+            { nome: "LORENZO MAGLIACCIO", id: "card-lorenzo", info: { RESIDENZA: "VIA ALBERI 21, CHIUPPANO", COORDINATE: "45.7605108, 11.4644352", STATUS: "IDENTIFICATO" }, doc: "CONCLUSIONE OPERAZIONE: Individuato a Chiuppano. Osservata attività sociale con Emily Mucca. Località: Casa Gialla.", pdfs: [{title:"Rapporto Investigativo L.M. (9/2/26)", content:"9/2/26\nRAPPORTO INVESTIGATIVO “L.M.”\nSoggetto: Lorenzo Magliaccio\nLocation: Chiuppano (VI)\nEtà: 14 anni\nRelazione: attuale con Emily Mucca"}] },
+            { nome: "NOEMI DERUSSI", id: "card-noemi", info: { ETÀ: "13 ANNI", LIVELLO: "2", CARATTERE: "IMPULSIVA / CALDA", FORZA: "DETERMINATA" }, doc: "NOTE: Profilo psicologico attivo. Obiettivo Livello 2: Individuazione abitazione.", pdfs: [{title:"Lista IP", content:"3-Noemi de russi livello 2 /"},{title:"Lista Progetti", content:"derussi noemi 12 trovare abitazione livello 2"},{title:"Profilo NOEMI 01", content:"NOEMI 01\nEtà ufficiale: 13\nNucleo centrale: caldo e impulsiva\nForza: determinata, curiosa"}] },
+            { nome: "PAOLO 02", id: "card-paolo", info: { ETÀ: "48 ANNI", CARATTERE: "ESPRESSIVO / CALMO", PIACE: "FAMIGLIA, VIOLENZA", FORZA: "CALMA" }, doc: "PROFILO: Stato emotivo registrato come 'basso'. Bassissimo livello di tolleranza verso il disordine.", pdfs: [{title:"Profilo PAOLO 02", content:"PAOLO 02\nEtà ufficiale: 48\nNucleo centrale: espressivo e calmo\nCosa piace: famiglia, violenza\nCosa non piace: disordine"}] },
+            { nome: "BARBARA 03", id: "card-barbara", info: { ETÀ: "51 ANNI", CARATTERE: "ESPRESSIVO", DEBOLEZZA: "NON SA ASCOLTARE", FORZA: "DETERMINATA" }, doc: "PROFILO: Nucleo centrale espressivo. Stato emotivo poco controllato. Pazienza: Bassa.", pdfs: [{title:"Profilo BARBARA 03", content:"BARBARA 03\nEtà ufficiale: 51\nNucleo centrale: espressivo\nLivello di pazienza: basso"}] },
+            { nome: "EMILY MUCCA", id: "card-emily", info: { ETÀ: "12 ANNI", RELAZIONE: "LORENZO MAGLIACCIO", STATUS: "MONITORATA" }, doc: "NOTA: Presenza rilevata a Chiuppano con il bersaglio primario. Febbraio 2026.", pdfs: [{title:"Lista IP", content:"2- Emily Mucca livello 2 in ricerca.."},{title:"Lista Progetti", content:"emily mucca 12 raccogliere impornti digitali livello 2"},{title:"Profilo EMILY 16", content:"EMILY 16\nEtà ufficiale: 13\nStato emotivo: felice\nDinamica sociale: isolata"}] },
+            { nome: "SERENA 14", id: "card-serena", info: { ETÀ: "12 ANNI (PERC. 11)", STATO: "TRISTE", SOCIAL: "ISOLATA" }, doc: "NOTE: Nucleo centrale 'far finto'. Carattere instabile. Minimo supporto sociale.", pdfs: [{title:"Profilo SERENA 14", content:"SERENA 14\nEtà ufficiale: 12\nEtà percepita: 11\nStato emotivo: abbastanza triste"}] },
+            { nome: "MICHELE 13", id: "card-michele", info: { ETÀ: "18 ANNI", STATO_EMOTIVO: "ANZIANO", PAZIENZA: "ALTO" }, doc: "NOTE: Nucleo centrale stabile. Alta maturità cognitiva rispetto all'età anagrafica.", pdfs: [{title:"Profilo MICHELE 13", content:"MICHELE 13\nEtà ufficiale: 18\nStato emotivo: anziano\nLivello di pazienza: alto"}] },
+            { nome: "LUISELLA 12", id: "card-luisella", info: { ETÀ: "65 ANNI", MATURITÀ: "ALTA", INTERESSI: "RAGAZZI INTRAPRENDENTI" }, doc: "PROFILO: Nucleo sensibile, stato emotivo coerente con le interazioni rilevate.", pdfs: [{title:"Profilo LUISELLA 12", content:"LUISELLA 12\nEtà ufficiale: 65\nMaturità: alta\nPSICHE\nCosa piace: ragazzi intraprendenti"}] }
+        ];
+        if (soggetti.length < 11) localStorage.setItem('soggetti', JSON.stringify(soggetti));
+
+        function saveSoggetti() { localStorage.setItem('soggetti', JSON.stringify(soggetti)); renderAllCards(); }
 
         function renderAllCards() {
             const container = document.getElementById('cards-container');
@@ -174,12 +217,15 @@
                 let infoHtml = '';
                 if (s.info) {
                     for (let [k, v] of Object.entries(s.info)) {
-                        infoHtml += `<div class="label">${k}:</div><div class="data" contenteditable="true" data-subj="${s.id}" data-key="${k}">${v}</div>`;
+                        infoHtml += `<div class="label">${k}:</div><div class="data">${v}</div>`;
                     }
                 }
                 const staffClass = s.isStaff ? 'staff-highlight' : '';
                 const staffTag = s.isStaff ? `<div class="staff-tag">[ AGENTE: ${s.ruolo || 'OPERATORE'} ]</div>` : '';
-                
+                let pdfHtml = s.pdfs ? s.pdfs.map(p => 
+                    `<button onclick="openAsPdf('${p.title}', \`${p.content.replace(/`/g,'\\`')}\`)" class="pdf-btn">📄 ${p.title}</button>`
+                ).join('') : '';
+
                 container.innerHTML += `
                     <div class="result-card ${staffClass}" id="${s.id}">
                         ${staffTag}
@@ -187,162 +233,324 @@
                         ${infoHtml}
                         <div class="doc-section">
                             <div class="doc-header">RAPPORTO TECNICO-INVESTIGATIVO</div>
-                            <div class="doc-content" contenteditable="true" id="doc-text-${s.id}">${s.doc || ''}</div>
+                            <div class="doc-content">${s.doc || '[NESSUN RAPPORTO DISPONIBILE]'}</div>
                         </div>
+                        
                         <div class="action-buttons">
-                            <button onclick="quickSave('${s.id}')" class="quick-save-btn">💾 SALVA MODIFICHE</button>
-                            <button onclick="exportDossier('${s.id}')" class="export-btn">📤 ESPORTA</button>
-                            <button onclick="editSubject('${s.id}')" class="export-btn edit-btn">✏️ ADMIN EDIT</button>
+                            <button onclick="exportDossier('${s.id}')" class="export-btn">📤 ESPORTA TXT</button>
+                            <button onclick="toggleDossier('${s.id}')" class="pdf-btn">📑 MOSTRA ALLEGATI</button>
+                            <button onclick="editSubject('${s.id}')" class="export-btn edit-btn">✏️ MODIFICA SOGGETTO</button>
+                        </div>
+                        
+                        <div id="dossier-${s.id}" style="display:none; margin-top:25px; border:2px solid var(--matrix-green); padding:20px;">
+                            ${pdfHtml || '<div style="opacity:0.6; text-align:center;">Nessun allegato disponibile</div>'}
                         </div>
                     </div>`;
             });
         }
 
-        // AGGIORNAMENTO STATO E SALVATAGGIO RAPIDO
-        function quickSave(id) {
-            const index = soggetti.findIndex(s => s.id === id);
-            if(index === -1) return;
-
-            // Leggi dati da campi editabili
-            const card = document.getElementById(id);
-            const dataFields = card.querySelectorAll(`.data[data-subj="${id}"]`);
-            dataFields.forEach(f => {
-                const key = f.getAttribute('data-key');
-                soggetti[index].info[key] = f.innerText.trim();
-            });
-
-            // Leggi rapporto
-            soggetti[index].doc = document.getElementById(`doc-text-${id}`).innerText.trim();
-
-            // Salva e Notifica
-            localStorage.setItem('soggetti', JSON.stringify(soggetti));
-            logAccess(`MODIFICA DATI: ${soggetti[index].nome} (da ${currentOperator})`);
-            
-            // Update Threat Level visuale
-            updateThreatStatus();
-
-            const btn = card.querySelector('.quick-save-btn');
-            btn.innerText = "✅ AGGIORNATO";
-            setTimeout(() => { btn.innerText = "💾 SALVA MODIFICHE"; }, 2000);
-        }
-
-        function updateThreatStatus() {
-            const tl = document.getElementById('threat-level');
-            tl.innerText = "YELLOW (DATA UPDATE)";
-            tl.style.color = "yellow";
-            setTimeout(() => {
-                tl.innerText = "GREEN";
-                tl.style.color = "#00ff41";
-            }, 4000);
-        }
-
-        // GESTIONE LOGIN
-        function checkPass() { 
-            if(document.getElementById('passInput').value==="2011"){ 
-                document.getElementById('login-overlay').style.display='none'; 
-                document.getElementById('operator-overlay').style.display='flex'; 
-            } else { document.getElementById('error-msg').style.display='block'; }
-        }
-
-        function selectOperator(name){ 
-            currentOperator=name; 
-            logAccess(`ACCESSO OPERATORE: ${name}`); 
-            document.getElementById('logged-as').innerText = `LOGGED AS: ${name}`;
-            document.getElementById('operator-overlay').style.display='none'; 
-            document.getElementById('main-content').style.display='block'; 
-            document.body.style.overflow='auto'; 
-            renderAllCards();
-            showAllCards();
-        }
-
-        function confirmCustom(){
-            const v = document.getElementById('customOperator').value.trim().toUpperCase();
-            if(v) selectOperator(v);
-        }
-
-        function showCustomInput(){ document.getElementById('custom-input').style.display='block'; }
-
-        // UTILITY DI RICERCA
-        function handleInput() {
-            const q = document.getElementById('searchInput').value.toUpperCase();
-            document.querySelectorAll('.result-card').forEach(card => {
-                card.style.display = card.innerText.toUpperCase().includes(q) ? 'block' : 'none';
-            });
-        }
-
         function showAllCards() { document.querySelectorAll('.result-card').forEach(c => c.style.display = 'block'); }
-        
-        function reopenOperator(){ location.reload(); }
+        function hideAllCards() { document.querySelectorAll('.result-card').forEach(c => c.style.display = 'none'); }
 
-        function resetDatabase() {
-            if(confirm("RESET TOTALE?")) { localStorage.clear(); location.reload(); }
+        function handleInput() {
+            const q = document.getElementById('searchInput').value.toUpperCase().trim();
+            const box = document.getElementById('suggestions');
+            box.innerHTML = '';
+            const matches = soggetti.filter(s =>
+                (s.nome || '').toUpperCase().includes(q) ||
+                JSON.stringify(s.info||{}).toUpperCase().includes(q) ||
+                (s.doc||'').toUpperCase().includes(q)
+            );
+            if (q.length === 0) {
+                box.style.display = 'block';
+                soggetti.forEach(m => {
+                    const item = document.createElement('div');
+                    item.className = 'suggestion-item';
+                    item.innerText = m.isStaff ? `⚡ ${m.nome}` : `👤 ${m.nome}`;
+                    item.onclick = () => { document.getElementById('searchInput').value = m.nome; handleInput(); box.style.display = 'none'; };
+                    box.appendChild(item);
+                });
+            } else if (matches.length) {
+                box.style.display = 'block';
+                matches.forEach(m => {
+                    const item = document.createElement('div');
+                    item.className = 'suggestion-item';
+                    item.innerText = m.isStaff ? `⚡ ${m.nome}` : `👤 ${m.nome}`;
+                    item.onclick = () => { document.getElementById('searchInput').value = m.nome; handleInput(); box.style.display = 'none'; };
+                    box.appendChild(item);
+                });
+            } else {
+                box.style.display = 'none';
+            }
+            hideAllCards();
+            const toShow = q.length === 0 ? soggetti : matches;
+            toShow.forEach(m => { 
+                const card = document.getElementById(m.id); 
+                if(card) card.style.display = 'block'; 
+            });
         }
 
-        // ADMIN PANEL FUNZIONI
+        function exportDossier(id) {
+            const card = document.getElementById(id); 
+            const nome = card.querySelector('.identikit-title').innerText.replace('FILE ID: ','');
+            let txt = `INTELLIGENCE TERMINAL v6.2\nFILE: ${nome}\n\n`;
+            card.querySelectorAll('.label').forEach((l,i) => {
+                txt += `${l.innerText} ${card.querySelectorAll('.data')[i].innerText}\n`;
+            });
+            txt += `\nRAPPORTO:\n${card.querySelector('.doc-content').innerText}`;
+            const blob = new Blob([txt], {type:'text/plain'}); 
+            const a = document.createElement('a'); 
+            a.href = URL.createObjectURL(blob); 
+            a.download = `DOSSIER_${nome.replace(/ /g,'_')}.txt`; 
+            a.click();
+        }
+
+        function openAsPdf(title, content){ 
+            const w = window.open('','_blank'); 
+            w.document.write(`<html><head><title>${title}</title><style>body{background:#000;color:#00ff41;font-family:Courier New;padding:40px;}</style></head><body><h1>${title}</h1><pre>${content}</pre></body></html>`); 
+            w.document.close();
+        }
+
+        function toggleDossier(id){ 
+            const d = document.getElementById('dossier-'+id); 
+            d.style.display = d.style.display === 'block' ? 'none' : 'block'; 
+        }
+
+        function clearEditFields() {
+            document.getElementById('edit-nome').value = '';
+            document.getElementById('edit-id').value = '';
+            document.getElementById('edit-staff').checked = false;
+            document.getElementById('edit-ruolo').value = '';
+            document.getElementById('edit-info').value = '';
+            document.getElementById('edit-doc').value = '';
+        }
+
         function showAdminModal() {
-            const sel = document.getElementById('edit-select');
-            sel.innerHTML = '<option value="NEW">-- NUOVO SOGGETTO --</option>';
-            soggetti.forEach(s => sel.innerHTML += `<option value="${s.id}">${s.nome}</option>`);
+            const select = document.getElementById('edit-select');
+            select.innerHTML = '<option value="">-- SELEZIONA SOGGETTO --</option><option value="NEW">➕ CREA NUOVO SOGGETTO</option>';
+            soggetti.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.id;
+                opt.textContent = s.nome;
+                select.appendChild(opt);
+            });
+            clearEditFields();
             document.getElementById('admin-modal').style.display = 'flex';
+        }
+
+        function loadForEdit() {
+            const val = document.getElementById('edit-select').value;
+            if (!val || val === "NEW") {
+                clearEditFields();
+                if (val === "NEW") document.getElementById('edit-id').value = 'card-nuovo-' + Date.now().toString().slice(-6);
+                return;
+            }
+            const subj = soggetti.find(s => s.id === val);
+            if (!subj) return;
+            document.getElementById('edit-nome').value = subj.nome || '';
+            document.getElementById('edit-id').value = subj.id || '';
+            document.getElementById('edit-staff').checked = !!subj.isStaff;
+            document.getElementById('edit-ruolo').value = subj.ruolo || '';
+            let infoStr = '';
+            if (subj.info) Object.entries(subj.info).forEach(([k,v]) => infoStr += `${k}: ${v}\n`);
+            document.getElementById('edit-info').value = infoStr.trim();
+            document.getElementById('edit-doc').value = subj.doc || '';
+        }
+
+        function saveSubject() {
+            let id = document.getElementById('edit-id').value.trim();
+            let nome = document.getElementById('edit-nome').value.trim();
+            if (!id) { alert('❌ ID obbligatorio!'); return; }
+            if (!nome) { alert('❌ NOME COMPLETO obbligatorio!'); return; }
+            let index = soggetti.findIndex(s => s.id === id);
+            let isNew = index === -1;
+            let subj = isNew ? { id: id, pdfs: [] } : soggetti[index];
+            subj.nome = nome;
+            subj.isStaff = document.getElementById('edit-staff').checked;
+            if (subj.isStaff) subj.ruolo = document.getElementById('edit-ruolo').value.trim() || 'OPERATORE';
+            else delete subj.ruolo;
+            subj.info = {};
+            const lines = document.getElementById('edit-info').value.trim().split('\n').filter(l => l.includes(':'));
+            lines.forEach(line => {
+                const [key, ...val] = line.split(':');
+                if (key.trim()) subj.info[key.trim().toUpperCase()] = val.join(':').trim();
+            });
+            subj.doc = document.getElementById('edit-doc').value.trim();
+            saveSoggetti();
+            alert(`✅ ${isNew ? 'NUOVO SOGGETTO CREATO' : 'SOGGETTO MODIFICATO'}!`);
+            closeAdminModal();
         }
 
         function closeAdminModal() { document.getElementById('admin-modal').style.display = 'none'; }
 
-        function saveSubject() {
-            const id = document.getElementById('edit-id').value || 'card-' + Date.now();
-            const nome = document.getElementById('edit-nome').value;
-            if(!nome) return alert("Nome mancante");
-            
-            const newObj = {
-                id: id,
-                nome: nome,
-                isStaff: document.getElementById('edit-staff').checked,
-                ruolo: document.getElementById('edit-ruolo').value,
-                doc: document.getElementById('edit-doc').value,
-                info: {}
-            };
-            
-            const lines = document.getElementById('edit-info').value.split('\n');
-            lines.forEach(l => {
-                const parts = l.split(':');
-                if(parts.length > 1) newObj.info[parts[0].trim().toUpperCase()] = parts[1].trim();
-            });
-
-            const idx = soggetti.findIndex(s => s.id === id);
-            if(idx > -1) soggetti[idx] = newObj; else soggetti.push(newObj);
-
-            localStorage.setItem('soggetti', JSON.stringify(soggetti));
-            logAccess(`ADMIN: ARCHIVIO AGGIORNATO (${nome})`);
-            location.reload();
-        }
-
         function editSubject(id) {
             showAdminModal();
-            const s = soggetti.find(x => x.id === id);
-            if(s) {
+            setTimeout(() => {
                 document.getElementById('edit-select').value = id;
-                document.getElementById('edit-id').value = s.id;
-                document.getElementById('edit-nome').value = s.nome;
-                document.getElementById('edit-doc').value = s.doc;
-                // info parsing...
+                loadForEdit();
+            }, 80);
+        }
+
+        // INVIO con tasto Enter nell'admin
+        document.getElementById('admin-modal').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && document.activeElement.tagName !== 'TEXTAREA') {
+                e.preventDefault();
+                saveSubject();
             }
-        }
+        });
 
-        function exportDossier(id) {
-            const s = soggetti.find(x => x.id === id);
-            const blob = new Blob([JSON.stringify(s, null, 2)], {type: 'text/plain'});
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `DOSSIER_${s.nome}.txt`;
-            a.click();
-        }
-
-        // TIME UPDATE
-        setInterval(() => {
-            document.getElementById('system-time').innerText = new Date().toLocaleTimeString('it-IT');
-        }, 1000);
-
+        // AVVIO
+        renderAllCards();
+        showAllCards();
         renderCronologia();
+
+        function updateStatus(){
+            setInterval(()=>{
+                document.getElementById('system-time').innerText = new Date().toLocaleTimeString('it-IT');
+            },1000);
+        }
+        updateStatus();<!-- ... tutto il codice precedente rimane uguale fino a qui ... -->
+
+<div id="admin-modal" style="display:none;">
+    <div id="admin-modal-content">
+        <h2>🛠 ADMIN PANEL v6.2</h2>
+        <select id="edit-select" onchange="loadForEdit()"></select><br><br>
+       
+        <input type="text" id="edit-nome" placeholder="NOME COMPLETO"><br>
+        <input type="text" id="edit-id" placeholder="ID (es. card-nuovo)"><br>
+        <label><input type="checkbox" id="edit-staff"> STAFF</label><br>
+        <input type="text" id="edit-ruolo" placeholder="RUOLO (solo staff)"><br>
+        <textarea id="edit-info" placeholder="INFO (una riga per campo)\nETÀ: 13\nIP: 151.16.25.87" rows="6"></textarea><br>
+        <textarea id="edit-doc" placeholder="RAPPORTO TECNICO-INVESTIGATIVO" rows="8"></textarea><br>
+       
+        <div class="admin-buttons" style="margin-top:30px; text-align:center; display:flex; justify-content:center; gap:15px; flex-wrap:wrap;">
+            <button onclick="saveSubject()" class="export-btn save-main-btn">
+                💾 SALVA MODIFICHE
+            </button>
+            <button onclick="saveSubjectAndStay()" class="export-btn save-continue-btn">
+                💾 SALVA e continua
+            </button>
+            <button onclick="closeAdminModal()" class="export-btn cancel-btn">
+                ANNULLA
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ... status-bar e chiusura body ... -->
+
+<script>
+// ... tutto il codice JavaScript precedente rimane invariato fino a saveSubject() ...
+
+function saveSubject(closeAfter = true) {
+    let id = document.getElementById('edit-id').value.trim();
+    let nome = document.getElementById('edit-nome').value.trim();
+
+    if (!id) {
+        alert('❌ ERRORE: ID obbligatorio!');
+        return;
+    }
+    if (!nome) {
+        alert('❌ ERRORE: NOME COMPLETO obbligatorio!');
+        return;
+    }
+
+    let index = soggetti.findIndex(s => s.id === id);
+    let isNew = index === -1;
+    let subj = isNew ? { id: id, pdfs: [] } : soggetti[index];
+
+    subj.nome = nome;
+    subj.isStaff = document.getElementById('edit-staff').checked;
+    
+    if (subj.isStaff) {
+        subj.ruolo = document.getElementById('edit-ruolo').value.trim() || 'OPERATORE';
+    } else {
+        delete subj.ruolo;
+    }
+
+    subj.info = {};
+    const lines = document.getElementById('edit-info').value.trim().split('\n');
+    lines.forEach(line => {
+        const trimmed = line.trim();
+        if (!trimmed || !trimmed.includes(':')) return;
+        const [key, ...valParts] = trimmed.split(':');
+        const value = valParts.join(':').trim();
+        if (key.trim()) {
+            subj.info[key.trim().toUpperCase()] = value;
+        }
+    });
+
+    subj.doc = document.getElementById('edit-doc').value.trim();
+
+    // Salva e aggiorna l'interfaccia
+    saveSoggetti();
+
+    const msg = isNew 
+        ? `✅ NUOVO SOGGETTO CREATO!\n\nID: ${id}\nNome: ${nome}`
+        : `✅ MODIFICHE SALVATE!\n\nID: ${id}\nNome: ${nome}`;
+
+    alert(msg);
+
+    if (closeAfter) {
+        closeAdminModal();
+    } else {
+        // Ricarica i valori nel form per sicurezza (utile per "salva e continua")
+        loadForEdit();
+    }
+}
+
+function saveSubjectAndStay() {
+    saveSubject(false);  // salva ma NON chiude
+    alert("✅ Salvato correttamente!\nPuoi continuare a modificare questo soggetto.");
+}
+
+function closeAdminModal() {
+    document.getElementById('admin-modal').style.display = 'none';
+}
+
+// ... il resto del codice JavaScript rimane invariato ...
+</script>
+
+<style>
+    /* Aggiunte per migliorare i bottoni di salvataggio */
+    .save-main-btn {
+        background: #004d00;
+        border: 2px solid #00ff88;
+        color: #00ff88;
+        font-weight: bold;
+        min-width: 220px;
+        padding: 14px 30px;
+        font-size: 18px;
+    }
+    .save-continue-btn {
+        background: #1a3c00;
+        border: 2px solid #66ff99;
+        color: #66ff99;
+        min-width: 220px;
+        padding: 14px 30px;
+        font-size: 18px;
+    }
+    .cancel-btn {
+        background: #330000;
+        border: 2px solid #ff3333;
+        color: #ff6666;
+        min-width: 180px;
+        padding: 14px 30px;
+        font-size: 18px;
+    }
+
+    .save-main-btn:hover, .save-continue-btn:hover {
+        background: #006600 !important;
+        color: white !important;
+        box-shadow: 0 0 25px #00ff41;
+        transform: scale(1.05);
+        transition: all 0.2s;
+    }
+    .cancel-btn:hover {
+        background: #660000 !important;
+        color: white !important;
+    }
+</style>
     </script>
 </body>
 </html>
