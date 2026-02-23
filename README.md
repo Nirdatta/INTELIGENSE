@@ -31,15 +31,16 @@
         button:hover { background:var(--matrix-green); color:var(--dark-bg); box-shadow:0 0 15px var(--matrix-green); }
         .action-buttons { margin: 35px 0 15px; display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
         .export-btn, .pdf-btn { min-width: 160px; }
-        .edit-btn { 
-            min-width: 180px; 
-            background: #004d00; 
-            border: 2px solid #00ff88; 
-            color: #00ff88; 
-            font-weight: bold; 
-            box-shadow: 0 0 12px rgba(0,255,136,0.4); 
+        .edit-btn {
+            min-width: 180px;
+            background: #004d00;
+            border: 2px solid #00ff88;
+            color: #00ff88;
+            font-weight: bold;
+            box-shadow: 0 0 12px rgba(0,255,136,0.4);
         }
         .edit-btn:hover { background: #006600; box-shadow: 0 0 20px rgba(0,255,136,0.7); }
+        .edit-btn.active { background: #006600; border-color: #88ffcc; color: #88ffcc; }
         #cronologia { max-width:1000px; margin:40px auto; border:2px solid var(--matrix-green); padding:25px; background:rgba(0,59,0,0.1); }
         #admin-modal-content { background:var(--dark-bg); border:3px solid var(--matrix-green); padding:30px; width:90%; max-width:720px; }
         textarea, input { width:100%; background:var(--dark-bg); border:1px solid var(--matrix-green); color:var(--matrix-green); padding:10px; margin:8px 0; font-family:inherit; box-sizing:border-box; }
@@ -101,14 +102,14 @@
         <div id="admin-modal-content">
             <h2>🛠 ADMIN PANEL v6.2</h2>
             <select id="edit-select" onchange="loadForEdit()"></select><br><br>
-            
+           
             <input type="text" id="edit-nome" placeholder="NOME COMPLETO"><br>
             <input type="text" id="edit-id" placeholder="ID (es. card-nuovo)"><br>
             <label><input type="checkbox" id="edit-staff"> STAFF</label><br>
             <input type="text" id="edit-ruolo" placeholder="RUOLO (solo staff)"><br>
             <textarea id="edit-info" placeholder="INFO (una riga per campo)\nETÀ: 13\nIP: 151.16.25.87" rows="6"></textarea><br>
             <textarea id="edit-doc" placeholder="RAPPORTO TECNICO-INVESTIGATIVO" rows="8"></textarea><br>
-            
+           
             <div class="admin-buttons" style="margin-top:30px; text-align:center;">
                 <button onclick="saveSubject()" class="export-btn" style="background:#004d00; border-color:#00ff88; color:#00ff88; font-size:18px; padding:14px 40px;">INVIA / SALVA</button>
                 <button onclick="closeAdminModal()" class="export-btn" style="margin-left:20px; background:#330000; border-color:#ff3333; font-size:18px; padding:14px 40px;">ANNULLA</button>
@@ -142,47 +143,46 @@
 
         // LOG + LOGIN
         let accessLog = JSON.parse(localStorage.getItem('accessLog')) || [];
-        function logAccess(op) { 
-            const now = new Date(); 
+        function logAccess(op) {
+            const now = new Date();
             const ts = now.toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric'}) + ' ' + now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
-            accessLog.unshift(`${ts} → ${op}`); 
-            if(accessLog.length>50) accessLog.pop(); 
-            localStorage.setItem('accessLog',JSON.stringify(accessLog)); 
-            renderCronologia(); 
+            accessLog.unshift(`${ts} → ${op}`);
+            if(accessLog.length>50) accessLog.pop();
+            localStorage.setItem('accessLog',JSON.stringify(accessLog));
+            renderCronologia();
         }
-        function renderCronologia() { 
-            document.getElementById('cronologia-list').innerHTML = accessLog.map(e=>`<div>${e}</div>`).join('') || '<div style="opacity:0.5;text-align:center;">Nessun accesso</div>'; 
+        function renderCronologia() {
+            document.getElementById('cronologia-list').innerHTML = accessLog.map(e=>`<div>${e}</div>`).join('') || '<div style="opacity:0.5;text-align:center;">Nessun accesso</div>';
         }
-        function exportLog() { 
-            if(!accessLog.length) return; 
-            const blob=new Blob(["CRONOLOGIA v6.2 BORIS\n\n"+accessLog.join("\n")],{type:"text/plain"}); 
-            const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`CRONOLOGIA_${new Date().toISOString().slice(0,10)}.txt`; a.click(); 
+        function exportLog() {
+            if(!accessLog.length) return;
+            const blob=new Blob(["CRONOLOGIA v6.2 BORIS\n\n"+accessLog.join("\n")],{type:"text/plain"});
+            const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`CRONOLOGIA_${new Date().toISOString().slice(0,10)}.txt`; a.click();
         }
-        function clearLog() { 
-            if(confirm("CANCELLARE TUTTA LA CRONOLOGIA?")) { accessLog=[]; localStorage.setItem('accessLog',JSON.stringify(accessLog)); renderCronologia(); } 
+        function clearLog() {
+            if(confirm("CANCELLARE TUTTA LA CRONOLOGIA?")) { accessLog=[]; localStorage.setItem('accessLog',JSON.stringify(accessLog)); renderCronologia(); }
         }
-
         let currentOperator = '';
         function updateLoggedAs() { document.getElementById('logged-as').innerText = `LOGGED AS: ${currentOperator}`; }
-        function checkPass() { 
-            if(document.getElementById('passInput').value==="2011"){ 
-                document.getElementById('login-overlay').style.display='none'; 
-                document.getElementById('operator-overlay').style.display='flex'; 
-            } else { 
-                document.getElementById('error-msg').style.display='block'; 
+        function checkPass() {
+            if(document.getElementById('passInput').value==="2011"){
+                document.getElementById('login-overlay').style.display='none';
+                document.getElementById('operator-overlay').style.display='flex';
+            } else {
+                document.getElementById('error-msg').style.display='block';
             }
         }
-        function selectOperator(name){ 
-            currentOperator=name; logAccess(name); updateLoggedAs(); 
-            document.getElementById('operator-overlay').style.display='none'; 
-            document.getElementById('main-content').style.display='block'; 
-            document.body.style.overflow='auto'; 
+        function selectOperator(name){
+            currentOperator=name; logAccess(name); updateLoggedAs();
+            document.getElementById('operator-overlay').style.display='none';
+            document.getElementById('main-content').style.display='block';
+            document.body.style.overflow='auto';
         }
         function showCustomInput(){ document.getElementById('custom-input').style.display='block'; }
-        function confirmCustom(){ 
-            const v=document.getElementById('customOperator').value.trim(); 
-            if(v){ currentOperator=v.toUpperCase(); logAccess(currentOperator); updateLoggedAs(); 
-            document.getElementById('operator-overlay').style.display='none'; 
+        function confirmCustom(){
+            const v=document.getElementById('customOperator').value.trim();
+            if(v){ currentOperator=v.toUpperCase(); logAccess(currentOperator); updateLoggedAs();
+            document.getElementById('operator-overlay').style.display='none';
             document.getElementById('main-content').style.display='block'; }
         }
         function reopenOperator(){ document.getElementById('operator-overlay').style.display='flex'; }
@@ -193,6 +193,7 @@
             }
         }
 
+        // DATABASE SOGGETTI
         let soggetti = JSON.parse(localStorage.getItem('soggetti')) || [
             { nome: "NIR.D", id: "card-nir", isStaff: true, ruolo: "HACKER / INTELLIGENCE", info: { GRADO: "OPERATORE ALPHA", SPECIALITÀ: "HACKING & TRACCIAMENTO", STATUS: "ATTIVO" }, doc: "RESPONSABILE SICUREZZA DIGITALE.\nHa gestito il tracciamento IP 151.16.25.87 e l'analisi dei metadati per l'operazione L.M. (Lorenzo Magliaccio).", pdfs: [{title:"Profilo NIR 05", content:"NIR 05\nEtà ufficiale: 13\nEtà percepita: 12\nMaturità: basso\nSesso: M\nNucleo centrale: calmo\nCosa piace: tecnologia"}] },
             { nome: "PASIN 04", id: "card-pasin", isStaff: true, ruolo: "SCIENTIFICA", info: { RUOLO: "TECNICO SCIENTIFICO", ETÀ: "14 ANNI", MATURITÀ: "STABILE" }, doc: "ANALISI DATI VITALI.\nParte della squadra che ha effettuato il riscontro visivo a Chiuppano.", pdfs: [{title:"Profilo PASIN 04", content:"PASIN 04\nEtà ufficiale: 13\nEtà percepita: 12\nMaturità: medio/alto\nSesso: M\nNucleo centrale: calmo e concentrato"}] },
@@ -208,7 +209,141 @@
         ];
         if (soggetti.length < 11) localStorage.setItem('soggetti', JSON.stringify(soggetti));
 
-        function saveSoggetti() { localStorage.setItem('soggetti', JSON.stringify(soggetti)); renderAllCards(); }
+        function saveSoggetti() {
+            localStorage.setItem('soggetti', JSON.stringify(soggetti));
+            renderAllCards();
+        }
+
+        // EDITING INLINE
+        let editingCardId = null;
+
+        function toggleEditMode(id) {
+            const card = document.getElementById(id);
+            if (!card) return;
+
+            if (editingCardId === id) {
+                saveInlineEdit(id);
+                return;
+            }
+
+            // Chiudi eventuale altra modifica aperta
+            if (editingCardId) {
+                cancelInlineEdit(editingCardId);
+            }
+
+            editingCardId = id;
+
+            const subj = soggetti.find(s => s.id === id);
+            if (!subj) return;
+
+            // Nascondi contenuto normale
+            card.querySelectorAll('.label, .data, .doc-section, .action-buttons > *:not(.edit-btn)').forEach(el => {
+                el.style.display = 'none';
+            });
+
+            let infoLines = '';
+            if (subj.info) {
+                Object.entries(subj.info).forEach(([k, v]) => {
+                    infoLines += `${k}: ${v}\n`;
+                });
+            }
+
+            const editFormHtml = `
+                <div class="inline-edit-form" style="padding:20px; border:2px dashed var(--matrix-green); background:rgba(0,80,0,0.25); margin:15px 0; border-radius:4px;">
+                    <h3 style="margin:0 0 15px 0; color:#88ffcc; text-align:center;">MODIFICA ${subj.nome}</h3>
+                    
+                    <label style="font-size:14px; opacity:0.8;">NOME COMPLETO</label><br>
+                    <input type="text" id="inline-nome-${id}" value="${(subj.nome || '').replace(/"/g,'&quot;')}" style="width:100%; font-size:18px;"><br><br>
+                    
+                    <label style="font-size:14px; opacity:0.8;">
+                        <input type="checkbox" id="inline-staff-${id}" ${subj.isStaff ? 'checked' : ''}> SOGGETTO STAFF
+                    </label><br>
+                    <div id="staff-role-${id}" style="display:${subj.isStaff ? 'block' : 'none'}; margin:12px 0;">
+                        <label style="font-size:14px; opacity:0.8;">RUOLO</label><br>
+                        <input type="text" id="inline-ruolo-${id}" value="${(subj.ruolo || '').replace(/"/g,'&quot;')}" style="width:100%;">
+                    </div>
+                    
+                    <label style="font-size:14px; opacity:0.8; margin-top:15px; display:block;">INFO (formato CHIAVE: valore - una per riga)</label>
+                    <textarea id="inline-info-${id}" rows="7" style="width:100%; font-size:15px; line-height:1.4;">${infoLines.trim()}</textarea><br><br>
+                    
+                    <label style="font-size:14px; opacity:0.8; display:block;">RAPPORTO TECNICO-INVESTIGATIVO</label>
+                    <textarea id="inline-doc-${id}" rows="10" style="width:100%; font-size:15px; line-height:1.4;">${(subj.doc || '').replace(/"/g,'&quot;')}</textarea><br><br>
+                    
+                    <div style="text-align:center; margin-top:20px;">
+                        <button onclick="saveInlineEdit('${id}')" style="background:#004d00; border:2px solid #88ffcc; color:#88ffcc; padding:12px 30px; font-size:17px; min-width:180px;">SALVA MODIFICHE</button>
+                        <button onclick="cancelInlineEdit('${id}')" style="margin-left:25px; background:#330000; border:2px solid #ff6666; color:#ff9999; padding:12px 30px; font-size:17px; min-width:180px;">ANNULLA</button>
+                    </div>
+                </div>
+            `;
+
+            // Inserisci form dopo il titolo
+            const titleElem = card.querySelector('.identikit-title');
+            titleElem.insertAdjacentHTML('afterend', editFormHtml);
+
+            // Gestione checkbox staff → mostra/nascondi ruolo
+            const staffCheck = document.getElementById(`inline-staff-${id}`);
+            const roleDiv = document.getElementById(`staff-role-${id}`);
+            staffCheck.addEventListener('change', () => {
+                roleDiv.style.display = staffCheck.checked ? 'block' : 'none';
+            });
+
+            // Cambia aspetto pulsante edit
+            const editBtn = card.querySelector('.edit-btn');
+            editBtn.textContent = '💾 SALVA MODIFICHE';
+            editBtn.classList.add('active');
+        }
+
+        function saveInlineEdit(id) {
+            const subjIndex = soggetti.findIndex(s => s.id === id);
+            if (subjIndex === -1) return;
+
+            const nome = document.getElementById(`inline-nome-${id}`).value.trim();
+            if (!nome) {
+                alert("❌ Il nome completo è obbligatorio!");
+                return;
+            }
+
+            const isStaff = document.getElementById(`inline-staff-${id}`).checked;
+            let ruolo = undefined;
+            if (isStaff) {
+                ruolo = document.getElementById(`inline-ruolo-${id}`).value.trim() || 'OPERATORE';
+            }
+
+            const infoText = document.getElementById(`inline-info-${id}`).value.trim();
+            const infoObj = {};
+            infoText.split('\n').forEach(line => {
+                line = line.trim();
+                if (line && line.includes(':')) {
+                    const [key, ...valParts] = line.split(':');
+                    const keyTrim = key.trim().toUpperCase();
+                    if (keyTrim) {
+                        infoObj[keyTrim] = valParts.join(':').trim();
+                    }
+                }
+            });
+
+            const doc = document.getElementById(`inline-doc-${id}`).value.trim();
+
+            // Aggiorna l'oggetto
+            soggetti[subjIndex] = {
+                ...soggetti[subjIndex],
+                nome,
+                isStaff,
+                ruolo: isStaff ? ruolo : undefined,
+                info: Object.keys(infoObj).length > 0 ? infoObj : undefined,
+                doc: doc || undefined
+            };
+
+            saveSoggetti();           // salva e ri-renderizza
+            editingCardId = null;
+
+            alert("✅ Modifiche salvate con successo.");
+        }
+
+        function cancelInlineEdit(id) {
+            editingCardId = null;
+            renderAllCards();   // modo più semplice per ripristinare tutto
+        }
 
         function renderAllCards() {
             const container = document.getElementById('cards-container');
@@ -222,7 +357,7 @@
                 }
                 const staffClass = s.isStaff ? 'staff-highlight' : '';
                 const staffTag = s.isStaff ? `<div class="staff-tag">[ AGENTE: ${s.ruolo || 'OPERATORE'} ]</div>` : '';
-                let pdfHtml = s.pdfs ? s.pdfs.map(p => 
+                let pdfHtml = s.pdfs ? s.pdfs.map(p =>
                     `<button onclick="openAsPdf('${p.title}', \`${p.content.replace(/`/g,'\\`')}\`)" class="pdf-btn">📄 ${p.title}</button>`
                 ).join('') : '';
 
@@ -235,13 +370,13 @@
                             <div class="doc-header">RAPPORTO TECNICO-INVESTIGATIVO</div>
                             <div class="doc-content">${s.doc || '[NESSUN RAPPORTO DISPONIBILE]'}</div>
                         </div>
-                        
+                       
                         <div class="action-buttons">
                             <button onclick="exportDossier('${s.id}')" class="export-btn">📤 ESPORTA TXT</button>
                             <button onclick="toggleDossier('${s.id}')" class="pdf-btn">📑 MOSTRA ALLEGATI</button>
-                            <button onclick="editSubject('${s.id}')" class="export-btn edit-btn">✏️ MODIFICA SOGGETTO</button>
+                            <button onclick="toggleEditMode('${s.id}')" class="export-btn edit-btn">✏️ MODIFICA SOGGETTO</button>
                         </div>
-                        
+                       
                         <div id="dossier-${s.id}" style="display:none; margin-top:25px; border:2px solid var(--matrix-green); padding:20px;">
                             ${pdfHtml || '<div style="opacity:0.6; text-align:center;">Nessun allegato disponibile</div>'}
                         </div>
@@ -261,13 +396,18 @@
                 JSON.stringify(s.info||{}).toUpperCase().includes(q) ||
                 (s.doc||'').toUpperCase().includes(q)
             );
+
             if (q.length === 0) {
                 box.style.display = 'block';
                 soggetti.forEach(m => {
                     const item = document.createElement('div');
                     item.className = 'suggestion-item';
                     item.innerText = m.isStaff ? `⚡ ${m.nome}` : `👤 ${m.nome}`;
-                    item.onclick = () => { document.getElementById('searchInput').value = m.nome; handleInput(); box.style.display = 'none'; };
+                    item.onclick = () => {
+                        document.getElementById('searchInput').value = m.nome;
+                        handleInput();
+                        box.style.display = 'none';
+                    };
                     box.appendChild(item);
                 });
             } else if (matches.length) {
@@ -276,44 +416,49 @@
                     const item = document.createElement('div');
                     item.className = 'suggestion-item';
                     item.innerText = m.isStaff ? `⚡ ${m.nome}` : `👤 ${m.nome}`;
-                    item.onclick = () => { document.getElementById('searchInput').value = m.nome; handleInput(); box.style.display = 'none'; };
+                    item.onclick = () => {
+                        document.getElementById('searchInput').value = m.nome;
+                        handleInput();
+                        box.style.display = 'none';
+                    };
                     box.appendChild(item);
                 });
             } else {
                 box.style.display = 'none';
             }
+
             hideAllCards();
             const toShow = q.length === 0 ? soggetti : matches;
-            toShow.forEach(m => { 
-                const card = document.getElementById(m.id); 
-                if(card) card.style.display = 'block'; 
+            toShow.forEach(m => {
+                const card = document.getElementById(m.id);
+                if(card) card.style.display = 'block';
             });
         }
 
         function exportDossier(id) {
-            const card = document.getElementById(id); 
+            const card = document.getElementById(id);
             const nome = card.querySelector('.identikit-title').innerText.replace('FILE ID: ','');
             let txt = `INTELLIGENCE TERMINAL v6.2\nFILE: ${nome}\n\n`;
             card.querySelectorAll('.label').forEach((l,i) => {
                 txt += `${l.innerText} ${card.querySelectorAll('.data')[i].innerText}\n`;
             });
             txt += `\nRAPPORTO:\n${card.querySelector('.doc-content').innerText}`;
-            const blob = new Blob([txt], {type:'text/plain'}); 
-            const a = document.createElement('a'); 
-            a.href = URL.createObjectURL(blob); 
-            a.download = `DOSSIER_${nome.replace(/ /g,'_')}.txt`; 
+            const blob = new Blob([txt], {type:'text/plain'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `DOSSIER_${nome.replace(/ /g,'_')}.txt`;
             a.click();
         }
 
-        function openAsPdf(title, content){ 
-            const w = window.open('','_blank'); 
-            w.document.write(`<html><head><title>${title}</title><style>body{background:#000;color:#00ff41;font-family:Courier New;padding:40px;}</style></head><body><h1>${title}</h1><pre>${content}</pre></body></html>`); 
+        function openAsPdf(title, content){
+            const w = window.open('','_blank');
+            w.document.write(`<html><head><title>${title}</title><style>body{background:#000;color:#00ff41;font-family:Courier New;padding:40px;}</style></head><body><h1>${title}</h1><pre>${content}</pre></body></html>`);
             w.document.close();
         }
 
-        function toggleDossier(id){ 
-            const d = document.getElementById('dossier-'+id); 
-            d.style.display = d.style.display === 'block' ? 'none' : 'block'; 
+        function toggleDossier(id){
+            const d = document.getElementById('dossier-'+id);
+            d.style.display = d.style.display === 'block' ? 'none' : 'block';
         }
 
         function clearEditFields() {
@@ -362,20 +507,25 @@
             let nome = document.getElementById('edit-nome').value.trim();
             if (!id) { alert('❌ ID obbligatorio!'); return; }
             if (!nome) { alert('❌ NOME COMPLETO obbligatorio!'); return; }
+
             let index = soggetti.findIndex(s => s.id === id);
             let isNew = index === -1;
             let subj = isNew ? { id: id, pdfs: [] } : soggetti[index];
+
             subj.nome = nome;
             subj.isStaff = document.getElementById('edit-staff').checked;
             if (subj.isStaff) subj.ruolo = document.getElementById('edit-ruolo').value.trim() || 'OPERATORE';
             else delete subj.ruolo;
+
             subj.info = {};
             const lines = document.getElementById('edit-info').value.trim().split('\n').filter(l => l.includes(':'));
             lines.forEach(line => {
                 const [key, ...val] = line.split(':');
                 if (key.trim()) subj.info[key.trim().toUpperCase()] = val.join(':').trim();
             });
+
             subj.doc = document.getElementById('edit-doc').value.trim();
+
             saveSoggetti();
             alert(`✅ ${isNew ? 'NUOVO SOGGETTO CREATO' : 'SOGGETTO MODIFICATO'}!`);
             closeAdminModal();
