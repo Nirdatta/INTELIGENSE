@@ -1,4 +1,4 @@
-# INTELIGENSE<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
@@ -27,11 +27,15 @@
         .data { font-size:20px; margin-bottom:5px; border-bottom:1px solid var(--dim-green); padding-bottom:5px; }
         .doc-section { margin-top:40px; padding:25px; border:1px dashed var(--matrix-green); background:rgba(0,59,0,0.1); }
         .doc-content { font-size:14px; line-height:1.5; white-space:pre-wrap; color:#a0ffa0; }
-        button { background:transparent; border:2px solid var(--matrix-green); color:var(--matrix-green); padding:12px 25px; margin:8px 5px; font-size:16px; }
+        button { background:transparent; border:2px solid var(--matrix-green); color:var(--matrix-green); padding:12px 25px; margin:8px 5px; font-size:16px; cursor:pointer; }
         button:hover { background:var(--matrix-green); color:var(--dark-bg); box-shadow:0 0 15px var(--matrix-green); }
+        .admin-buttons { margin-top: 30px; text-align: center; }
+        .save-btn { background: #004d00 !important; border-color: #00ff41 !important; font-size: 18px !important; padding: 14px 40px !important; }
+        .cancel-btn { background: #330000 !important; border-color: #ff3333 !important; font-size: 18px !important; padding: 14px 40px !important; }
         #cronologia { max-width:1000px; margin:40px auto; border:2px solid var(--matrix-green); padding:25px; background:rgba(0,59,0,0.1); }
         #admin-modal-content { background:var(--dark-bg); border:3px solid var(--matrix-green); padding:30px; width:90%; max-width:720px; }
-        textarea { width:100%; background:var(--dark-bg); border:1px solid var(--matrix-green); color:var(--matrix-green); padding:10px; min-height:140px; font-family:inherit; }
+        textarea, input { width:100%; background:var(--dark-bg); border:1px solid var(--matrix-green); color:var(--matrix-green); padding:10px; margin:8px 0; font-family:inherit; box-sizing:border-box; }
+        select { width:100%; background:var(--dark-bg); border:1px solid var(--matrix-green); color:var(--matrix-green); padding:10px; margin:8px 0; }
         #status-bar { position:fixed; bottom:0; left:0; width:100%; background:rgba(0,0,0,0.95); border-top:2px solid var(--matrix-green); padding:10px; text-align:center; font-size:13px; z-index:10000; }
     </style>
 </head>
@@ -69,10 +73,12 @@
             <button onclick="showAdminModal()" class="export-btn" style="margin-left:10px;">🛠 ADMIN PANEL</button>
             <button onclick="resetDatabase()" class="export-btn" style="margin-left:10px; background:#330000;">RESET DATABASE</button>
         </div>
+
         <div class="search-box">
             <input type="text" id="searchInput" placeholder="SEARCH IDENTITIES..." oninput="handleInput()" autocomplete="off">
             <div id="suggestions"></div>
         </div>
+
         <div id="cards-container"></div>
 
         <div id="cronologia">
@@ -85,16 +91,20 @@
 
     <div id="admin-modal" style="display:none;">
         <div id="admin-modal-content">
-            <h2>🛠 ADMIN PANEL</h2>
-            <select id="edit-select" onchange="loadForEdit()" style="width:100%;padding:10px;"></select><br><br>
+            <h2>🛠 ADMIN PANEL v6.2</h2>
+            <select id="edit-select" onchange="loadForEdit()"></select><br><br>
+            
             <input type="text" id="edit-nome" placeholder="NOME COMPLETO"><br>
             <input type="text" id="edit-id" placeholder="ID (es. card-nuovo)"><br>
             <label><input type="checkbox" id="edit-staff"> STAFF</label><br>
             <input type="text" id="edit-ruolo" placeholder="RUOLO (solo staff)"><br>
-            <textarea id="edit-info" placeholder="INFO (una riga per campo)\nETÀ: 13\nIP: 151.16.25.87"></textarea><br>
-            <textarea id="edit-doc" placeholder="RAPPORTO TECNICO-INVESTIGATIVO"></textarea><br>
-            <button onclick="saveSubject()" class="export-btn">💾 SALVA / AGGIORNA</button>
-            <button onclick="closeAdminModal()" class="export-btn" style="background:#330000;">ANNULLA</button>
+            <textarea id="edit-info" placeholder="INFO (una riga per campo)\nETÀ: 13\nIP: 151.16.25.87" rows="6"></textarea><br>
+            <textarea id="edit-doc" placeholder="RAPPORTO TECNICO-INVESTIGATIVO" rows="8"></textarea><br>
+            
+            <div class="admin-buttons">
+                <button onclick="saveSubject()" class="export-btn save-btn">INVIA / SALVA</button>
+                <button onclick="closeAdminModal()" class="export-btn cancel-btn">ANNULLA</button>
+            </div>
         </div>
     </div>
 
@@ -103,7 +113,7 @@
     </div>
 
     <script>
-        // MATRIX RAIN (invariato)
+        // MATRIX RAIN
         const canvas = document.getElementById('matrix-bg');
         const ctx = canvas.getContext('2d');
         function resizeCanvas() { canvas.height = window.innerHeight; canvas.width = window.innerWidth; }
@@ -122,24 +132,52 @@
         }
         setInterval(drawMatrix, 35);
 
-        // CRONOLOGIA (invariata)
+        // LOG + LOGIN
         let accessLog = JSON.parse(localStorage.getItem('accessLog')) || [];
-        function logAccess(op) { const now = new Date(); const ts = now.toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric'}) + ' ' + now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
-            accessLog.unshift(`${ts} → ${op}`); if(accessLog.length>50) accessLog.pop(); localStorage.setItem('accessLog',JSON.stringify(accessLog)); renderCronologia(); }
-        function renderCronologia() { document.getElementById('cronologia-list').innerHTML = accessLog.map(e=>`<div>${e}</div>`).join('') || '<div style="opacity:0.5;text-align:center;">Nessun accesso</div>'; }
-        function exportLog() { if(!accessLog.length) return; const blob=new Blob(["CRONOLOGIA v6.2 BORIS\n\n"+accessLog.join("\n")],{type:"text/plain"}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`CRONOLOGIA_${new Date().toISOString().slice(0,10)}.txt`; a.click(); }
-        function clearLog() { if(confirm("CANCELLARE TUTTA LA CRONOLOGIA?")) { accessLog=[]; localStorage.setItem('accessLog',JSON.stringify(accessLog)); renderCronologia(); } }
+        function logAccess(op) { 
+            const now = new Date(); 
+            const ts = now.toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric'}) + ' ' + now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+            accessLog.unshift(`${ts} → ${op}`); 
+            if(accessLog.length>50) accessLog.pop(); 
+            localStorage.setItem('accessLog',JSON.stringify(accessLog)); 
+            renderCronologia(); 
+        }
+        function renderCronologia() { 
+            document.getElementById('cronologia-list').innerHTML = accessLog.map(e=>`<div>${e}</div>`).join('') || '<div style="opacity:0.5;text-align:center;">Nessun accesso</div>'; 
+        }
+        function exportLog() { 
+            if(!accessLog.length) return; 
+            const blob=new Blob(["CRONOLOGIA v6.2 BORIS\n\n"+accessLog.join("\n")],{type:"text/plain"}); 
+            const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`CRONOLOGIA_${new Date().toISOString().slice(0,10)}.txt`; a.click(); 
+        }
+        function clearLog() { 
+            if(confirm("CANCELLARE TUTTA LA CRONOLOGIA?")) { accessLog=[]; localStorage.setItem('accessLog',JSON.stringify(accessLog)); renderCronologia(); } 
+        }
 
         let currentOperator = '';
         function updateLoggedAs() { document.getElementById('logged-as').innerText = `LOGGED AS: ${currentOperator}`; }
-
-        function checkPass() { if(document.getElementById('passInput').value==="intelligense 1912"){ document.getElementById('login-overlay').style.display='none'; document.getElementById('operator-overlay').style.display='flex'; } else { document.getElementById('error-msg').style.display='block'; }}
-        function selectOperator(name){ currentOperator=name; logAccess(name); updateLoggedAs(); document.getElementById('operator-overlay').style.display='none'; document.getElementById('main-content').style.display='block'; document.body.style.overflow='auto'; }
+        function checkPass() { 
+            if(document.getElementById('passInput').value==="2011"){ 
+                document.getElementById('login-overlay').style.display='none'; 
+                document.getElementById('operator-overlay').style.display='flex'; 
+            } else { 
+                document.getElementById('error-msg').style.display='block'; 
+            }
+        }
+        function selectOperator(name){ 
+            currentOperator=name; logAccess(name); updateLoggedAs(); 
+            document.getElementById('operator-overlay').style.display='none'; 
+            document.getElementById('main-content').style.display='block'; 
+            document.body.style.overflow='auto'; 
+        }
         function showCustomInput(){ document.getElementById('custom-input').style.display='block'; }
-        function confirmCustom(){ const v=document.getElementById('customOperator').value.trim(); if(v){ currentOperator=v.toUpperCase(); logAccess(currentOperator); updateLoggedAs(); document.getElementById('operator-overlay').style.display='none'; document.getElementById('main-content').style.display='block'; }}
+        function confirmCustom(){ 
+            const v=document.getElementById('customOperator').value.trim(); 
+            if(v){ currentOperator=v.toUpperCase(); logAccess(currentOperator); updateLoggedAs(); 
+            document.getElementById('operator-overlay').style.display='none'; 
+            document.getElementById('main-content').style.display='block'; }
+        }
         function reopenOperator(){ document.getElementById('operator-overlay').style.display='flex'; }
-
-        // ==================== RESET AUTOMATICO + TUTTI I 11 SOGGETTI ====================
         function resetDatabase() {
             if(confirm("RESETTARE TUTTO IL DATABASE AI VALORI ORIGINALI?")) {
                 localStorage.removeItem('soggetti');
@@ -150,36 +188,19 @@
         let soggetti = JSON.parse(localStorage.getItem('soggetti')) || [
             { nome: "NIR.D", id: "card-nir", isStaff: true, ruolo: "HACKER / INTELLIGENCE", info: { GRADO: "OPERATORE ALPHA", SPECIALITÀ: "HACKING & TRACCIAMENTO", STATUS: "ATTIVO" }, doc: "RESPONSABILE SICUREZZA DIGITALE.\nHa gestito il tracciamento IP 151.16.25.87 e l'analisi dei metadati per l'operazione L.M. (Lorenzo Magliaccio).", pdfs: [{title:"Profilo NIR 05", content:"NIR 05\nEtà ufficiale: 13\nEtà percepita: 12\nMaturità: basso\nSesso: M\nNucleo centrale: calmo\nCosa piace: tecnologia"}] },
             { nome: "PASIN 04", id: "card-pasin", isStaff: true, ruolo: "SCIENTIFICA", info: { RUOLO: "TECNICO SCIENTIFICO", ETÀ: "14 ANNI", MATURITÀ: "STABILE" }, doc: "ANALISI DATI VITALI.\nParte della squadra che ha effettuato il riscontro visivo a Chiuppano.", pdfs: [{title:"Profilo PASIN 04", content:"PASIN 04\nEtà ufficiale: 13\nEtà percepita: 12\nMaturità: medio/alto\nSesso: M\nNucleo centrale: calmo e concentrato"}] },
-            { nome: "ADAM GRITCAN", id: "card-adam", info: { ETÀ: "13 ANNI", LIVELLO: "1", IP: "151.16.25.87", MISSIONE: "RACCOLTA IMPRONTE" }, doc: "DOSSIER: Investigazione avviata per offese gratuite. Tracciamento digitale prioritario.", pdfs: [
-                {title:"Lista IP Pubblici", content:"1- Adam Gritcan livello1 151.16.25.87\n2- Emily Mucca livello 2 in ricerca..\n3-Noemi de russi livello 2 /"},
-                {title:"Lista Progetti", content:"Adam Gritcan 13 chiarire offese gratuite ecc.. livello 1"}
-            ] },
+            { nome: "ADAM GRITCAN", id: "card-adam", info: { ETÀ: "13 ANNI", LIVELLO: "1", IP: "151.16.25.87", MISSIONE: "RACCOLTA IMPRONTE" }, doc: "DOSSIER: Investigazione avviata per offese gratuite. Tracciamento digitale prioritario.", pdfs: [{title:"Lista IP Pubblici", content:"1- Adam Gritcan livello1 151.16.25.87\n2- Emily Mucca livello 2 in ricerca..\n3-Noemi de russi livello 2 /"},{title:"Lista Progetti", content:"Adam Gritcan 13 chiarire offese gratuite ecc.. livello 1"}] },
             { nome: "LORENZO MAGLIACCIO", id: "card-lorenzo", info: { RESIDENZA: "VIA ALBERI 21, CHIUPPANO", COORDINATE: "45.7605108, 11.4644352", STATUS: "IDENTIFICATO" }, doc: "CONCLUSIONE OPERAZIONE: Individuato a Chiuppano. Osservata attività sociale con Emily Mucca. Località: Casa Gialla.", pdfs: [{title:"Rapporto Investigativo L.M. (9/2/26)", content:"9/2/26\nRAPPORTO INVESTIGATIVO “L.M.”\nSoggetto: Lorenzo Magliaccio\nLocation: Chiuppano (VI)\nEtà: 14 anni\nRelazione: attuale con Emily Mucca"}] },
-            { nome: "NOEMI DERUSSI", id: "card-noemi", info: { ETÀ: "13 ANNI", LIVELLO: "2", CARATTERE: "IMPULSIVA / CALDA", FORZA: "DETERMINATA" }, doc: "NOTE: Profilo psicologico attivo. Obiettivo Livello 2: Individuazione abitazione.", pdfs: [
-                {title:"Lista IP", content:"3-Noemi de russi livello 2 /"},
-                {title:"Lista Progetti", content:"derussi noemi 12 trovare abitazione livello 2"},
-                {title:"Profilo NOEMI 01", content:"NOEMI 01\nEtà ufficiale: 13\nNucleo centrale: caldo e impulsiva\nForza: determinata, curiosa"}
-            ] },
+            { nome: "NOEMI DERUSSI", id: "card-noemi", info: { ETÀ: "13 ANNI", LIVELLO: "2", CARATTERE: "IMPULSIVA / CALDA", FORZA: "DETERMINATA" }, doc: "NOTE: Profilo psicologico attivo. Obiettivo Livello 2: Individuazione abitazione.", pdfs: [{title:"Lista IP", content:"3-Noemi de russi livello 2 /"},{title:"Lista Progetti", content:"derussi noemi 12 trovare abitazione livello 2"},{title:"Profilo NOEMI 01", content:"NOEMI 01\nEtà ufficiale: 13\nNucleo centrale: caldo e impulsiva\nForza: determinata, curiosa"}] },
             { nome: "PAOLO 02", id: "card-paolo", info: { ETÀ: "48 ANNI", CARATTERE: "ESPRESSIVO / CALMO", PIACE: "FAMIGLIA, VIOLENZA", FORZA: "CALMA" }, doc: "PROFILO: Stato emotivo registrato come 'basso'. Bassissimo livello di tolleranza verso il disordine.", pdfs: [{title:"Profilo PAOLO 02", content:"PAOLO 02\nEtà ufficiale: 48\nNucleo centrale: espressivo e calmo\nCosa piace: famiglia, violenza\nCosa non piace: disordine"}] },
             { nome: "BARBARA 03", id: "card-barbara", info: { ETÀ: "51 ANNI", CARATTERE: "ESPRESSIVO", DEBOLEZZA: "NON SA ASCOLTARE", FORZA: "DETERMINATA" }, doc: "PROFILO: Nucleo centrale espressivo. Stato emotivo poco controllato. Pazienza: Bassa.", pdfs: [{title:"Profilo BARBARA 03", content:"BARBARA 03\nEtà ufficiale: 51\nNucleo centrale: espressivo\nLivello di pazienza: basso"}] },
-            { nome: "EMILY MUCCA", id: "card-emily", info: { ETÀ: "12 ANNI", RELAZIONE: "LORENZO MAGLIACCIO", STATUS: "MONITORATA" }, doc: "NOTA: Presenza rilevata a Chiuppano con il bersaglio primario. Febbraio 2026.", pdfs: [
-                {title:"Lista IP", content:"2- Emily Mucca livello 2 in ricerca.."},
-                {title:"Lista Progetti", content:"emily mucca 12 raccogliere impornti digitali livello 2"},
-                {title:"Profilo EMILY 16", content:"EMILY 16\nEtà ufficiale: 13\nStato emotivo: felice\nDinamica sociale: isolata"}
-            ] },
+            { nome: "EMILY MUCCA", id: "card-emily", info: { ETÀ: "12 ANNI", RELAZIONE: "LORENZO MAGLIACCIO", STATUS: "MONITORATA" }, doc: "NOTA: Presenza rilevata a Chiuppano con il bersaglio primario. Febbraio 2026.", pdfs: [{title:"Lista IP", content:"2- Emily Mucca livello 2 in ricerca.."},{title:"Lista Progetti", content:"emily mucca 12 raccogliere impornti digitali livello 2"},{title:"Profilo EMILY 16", content:"EMILY 16\nEtà ufficiale: 13\nStato emotivo: felice\nDinamica sociale: isolata"}] },
             { nome: "SERENA 14", id: "card-serena", info: { ETÀ: "12 ANNI (PERC. 11)", STATO: "TRISTE", SOCIAL: "ISOLATA" }, doc: "NOTE: Nucleo centrale 'far finto'. Carattere instabile. Minimo supporto sociale.", pdfs: [{title:"Profilo SERENA 14", content:"SERENA 14\nEtà ufficiale: 12\nEtà percepita: 11\nStato emotivo: abbastanza triste"}] },
             { nome: "MICHELE 13", id: "card-michele", info: { ETÀ: "18 ANNI", STATO_EMOTIVO: "ANZIANO", PAZIENZA: "ALTO" }, doc: "NOTE: Nucleo centrale stabile. Alta maturità cognitiva rispetto all'età anagrafica.", pdfs: [{title:"Profilo MICHELE 13", content:"MICHELE 13\nEtà ufficiale: 18\nStato emotivo: anziano\nLivello di pazienza: alto"}] },
             { nome: "LUISELLA 12", id: "card-luisella", info: { ETÀ: "65 ANNI", MATURITÀ: "ALTA", INTERESSI: "RAGAZZI INTRAPRENDENTI" }, doc: "PROFILO: Nucleo sensibile, stato emotivo coerente con le interazioni rilevate.", pdfs: [{title:"Profilo LUISELLA 12", content:"LUISELLA 12\nEtà ufficiale: 65\nMaturità: alta\nPSICHE\nCosa piace: ragazzi intraprendenti"}] }
         ];
-
-        // FORZA RESET SE MANCANO PERSONE
-        if (soggetti.length < 11) {
-            localStorage.setItem('soggetti', JSON.stringify(soggetti));
-        }
+        if (soggetti.length < 11) localStorage.setItem('soggetti', JSON.stringify(soggetti));
 
         function saveSoggetti() { localStorage.setItem('soggetti', JSON.stringify(soggetti)); renderAllCards(); }
-
-        // RENDER CARTE
         function renderAllCards() {
             const container = document.getElementById('cards-container');
             container.innerHTML = '';
@@ -188,7 +209,7 @@
                 if(s.info) for(let [k,v] of Object.entries(s.info)) infoHtml += `<div class="label">${k}:</div><div class="data">${v}</div>`;
                 const staffClass = s.isStaff ? 'staff-highlight' : '';
                 const staffTag = s.isStaff ? `<div class="staff-tag">[ AGENTE: ${s.ruolo} ]</div>` : '';
-                let pdfHtml = s.pdfs ? s.pdfs.map(p => `<button onclick="openAsPdf('${p.title}', \`${p.content}\`)" class="pdf-btn">📄 ${p.title}</button>`).join('') : '';
+                let pdfHtml = s.pdfs ? s.pdfs.map(p => `<button onclick="openAsPdf('${p.title}', \`${p.content.replace(/`/g,'\\`')}\`)" class="pdf-btn">📄 ${p.title}</button>`).join('') : '';
                 container.innerHTML += `
                     <div class="result-card ${staffClass}" id="${s.id}">
                         ${staffTag}
@@ -203,47 +224,162 @@
             });
         }
 
-        // RICERCA (potenziata)
+        function showAllCards() { document.querySelectorAll('.result-card').forEach(c => c.style.display = 'block'); }
+        function hideAllCards() { document.querySelectorAll('.result-card').forEach(c => c.style.display = 'none'); }
+
         function handleInput() {
             const q = document.getElementById('searchInput').value.toUpperCase().trim();
             const box = document.getElementById('suggestions');
-            box.innerHTML = ''; hideAllCards();
-            if(q.length===0) return;
-            const matches = soggetti.filter(s => 
-                s.nome.toUpperCase().includes(q) || 
-                JSON.stringify(s.info||{}).toUpperCase().includes(q) || 
+            box.innerHTML = '';
+            const matches = soggetti.filter(s =>
+                (s.nome || '').toUpperCase().includes(q) ||
+                JSON.stringify(s.info||{}).toUpperCase().includes(q) ||
                 (s.doc||'').toUpperCase().includes(q)
             );
-            if(matches.length){
-                box.style.display='block';
-                matches.forEach(m => {
+            if (q.length === 0) {
+                box.style.display = 'block';
+                soggetti.forEach(m => {
                     const item = document.createElement('div');
-                    item.className='suggestion-item';
+                    item.className = 'suggestion-item';
                     item.innerText = m.isStaff ? `⚡ ${m.nome}` : `👤 ${m.nome}`;
-                    item.onclick = () => { hideAllCards(); document.getElementById(m.id).style.display='block'; box.style.display='none'; document.getElementById('searchInput').value = m.nome; };
+                    item.onclick = () => { document.getElementById('searchInput').value = m.nome; handleInput(); box.style.display = 'none'; };
                     box.appendChild(item);
                 });
+            } else if (matches.length) {
+                box.style.display = 'block';
+                matches.forEach(m => {
+                    const item = document.createElement('div');
+                    item.className = 'suggestion-item';
+                    item.innerText = m.isStaff ? `⚡ ${m.nome}` : `👤 ${m.nome}`;
+                    item.onclick = () => { document.getElementById('searchInput').value = m.nome; handleInput(); box.style.display = 'none'; };
+                    box.appendChild(item);
+                });
+            } else {
+                box.style.display = 'none';
             }
+            hideAllCards();
+            const toShow = q.length === 0 ? soggetti : matches;
+            toShow.forEach(m => { const card = document.getElementById(m.id); if(card) card.style.display = 'block'; });
         }
-        function hideAllCards(){ document.querySelectorAll('.result-card').forEach(c=>c.style.display='none'); }
 
-        function exportDossier(id) { /* stesso di prima */ const card=document.getElementById(id); const nome=card.querySelector('.identikit-title').innerText.replace('FILE ID: ',''); let txt=`INTELLIGENCE TERMINAL v6.2\nFILE: ${nome}\n\n`; card.querySelectorAll('.label').forEach((l,i)=>txt+=`${l.innerText} ${card.querySelectorAll('.data')[i].innerText}\n`); txt+=`\nRAPPORTO:\n${card.querySelector('.doc-content').innerText}`; const blob=new Blob([txt],{type:'text/plain'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`DOSSIER_${nome.replace(/ /g,'_')}.txt`; a.click(); }
-        function openAsPdf(title,content){ const w=window.open('','_blank'); w.document.write(`<html><head><title>${title}</title><style>body{background:#000;color:#00ff41;font-family:Courier New;padding:40px;}</style></head><body><h1>${title}</h1><pre>${content}</pre></body></html>`); }
-        function toggleDossier(id){ const d=document.getElementById('dossier-'+id); d.style.display = d.style.display==='block'?'none':'block'; }
+        function exportDossier(id) {
+            const card=document.getElementById(id); 
+            const nome=card.querySelector('.identikit-title').innerText.replace('FILE ID: ','');
+            let txt=`INTELLIGENCE TERMINAL v6.2\nFILE: ${nome}\n\n`;
+            card.querySelectorAll('.label').forEach((l,i)=>txt+=`${l.innerText} ${card.querySelectorAll('.data')[i].innerText}\n`);
+            txt+=`\nRAPPORTO:\n${card.querySelector('.doc-content').innerText}`;
+            const blob=new Blob([txt],{type:'text/plain'}); 
+            const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`DOSSIER_${nome.replace(/ /g,'_')}.txt`; a.click();
+        }
 
-        // ADMIN (invariato ma funzionante)
-        function showAdminModal(){ /* codice identico a prima */ }
-        function closeAdminModal(){ document.getElementById('admin-modal').style.display='none'; }
-        function loadForEdit(){ /* codice identico a prima */ }
-        function saveSubject(){ /* codice identico a prima */ }
-        function editSubject(id){ document.getElementById('edit-select').value=id; loadForEdit(); document.getElementById('admin-modal').style.display='flex'; }
+        function openAsPdf(title,content){ 
+            const w=window.open('','_blank'); 
+            w.document.write(`<html><head><title>${title}</title><style>body{background:#000;color:#00ff41;font-family:Courier New;padding:40px;}</style></head><body><h1>${title}</h1><pre>${content}</pre></body></html>`); 
+        }
 
-        function updateStatus(){ setInterval(()=>{ document.getElementById('system-time').innerText=new Date().toLocaleTimeString('it-IT'); },1000); }
+        function toggleDossier(id){ 
+            const d=document.getElementById('dossier-'+id); 
+            d.style.display = d.style.display==='block'?'none':'block'; 
+        }
+
+        function clearEditFields() {
+            document.getElementById('edit-nome').value = '';
+            document.getElementById('edit-id').value = '';
+            document.getElementById('edit-staff').checked = false;
+            document.getElementById('edit-ruolo').value = '';
+            document.getElementById('edit-info').value = '';
+            document.getElementById('edit-doc').value = '';
+        }
+
+        function showAdminModal() {
+            const select = document.getElementById('edit-select');
+            select.innerHTML = '<option value="">-- SELEZIONA SOGGETTO --</option><option value="NEW">➕ CREA NUOVO SOGGETTO</option>';
+            soggetti.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.id;
+                opt.textContent = s.nome;
+                select.appendChild(opt);
+            });
+            clearEditFields();
+            document.getElementById('admin-modal').style.display = 'flex';
+        }
+
+        function loadForEdit() {
+            const val = document.getElementById('edit-select').value;
+            if (!val || val === "NEW") {
+                clearEditFields();
+                if (val === "NEW") document.getElementById('edit-id').value = 'card-nuovo-' + Date.now().toString().slice(-6);
+                return;
+            }
+            const subj = soggetti.find(s => s.id === val);
+            if (!subj) return;
+            document.getElementById('edit-nome').value = subj.nome || '';
+            document.getElementById('edit-id').value = subj.id || '';
+            document.getElementById('edit-staff').checked = !!subj.isStaff;
+            document.getElementById('edit-ruolo').value = subj.ruolo || '';
+            let infoStr = '';
+            if (subj.info) Object.entries(subj.info).forEach(([k,v]) => infoStr += `${k}: ${v}\n`);
+            document.getElementById('edit-info').value = infoStr.trim();
+            document.getElementById('edit-doc').value = subj.doc || '';
+        }
+
+        function saveSubject() {
+            let id = document.getElementById('edit-id').value.trim();
+            let nome = document.getElementById('edit-nome').value.trim();
+            if (!id) { alert('❌ ID obbligatorio!'); return; }
+            if (!nome) { alert('❌ NOME COMPLETO obbligatorio!'); return; }
+            let index = soggetti.findIndex(s => s.id === id);
+            let isNew = index === -1;
+            let subj = isNew ? { id: id, pdfs: [] } : soggetti[index];
+            subj.nome = nome;
+            subj.isStaff = document.getElementById('edit-staff').checked;
+            if (subj.isStaff) subj.ruolo = document.getElementById('edit-ruolo').value.trim() || 'OPERATORE';
+            else delete subj.ruolo;
+            subj.info = {};
+            const lines = document.getElementById('edit-info').value.trim().split('\n').filter(l => l.includes(':'));
+            lines.forEach(line => {
+                const [key, ...val] = line.split(':');
+                if (key.trim()) subj.info[key.trim().toUpperCase()] = val.join(':').trim();
+            });
+            subj.doc = document.getElementById('edit-doc').value.trim();
+            saveSoggetti();
+            alert(`✅ ${isNew ? 'NUOVO SOGGETTO CREATO' : 'SOGGETTO MODIFICATO'}!`);
+            closeAdminModal();
+        }
+
+        function closeAdminModal() { document.getElementById('admin-modal').style.display = 'none'; }
+
+        function editSubject(id) {
+            showAdminModal();
+            setTimeout(() => {
+                document.getElementById('edit-select').value = id;
+                loadForEdit();
+            }, 100);
+        }
+
+        // INVIO con tasto Enter
+        document.getElementById('admin-modal').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.ctrlKey && !e.shiftKey && !e.altKey && !e.metaKey) {
+                e.preventDefault();
+                saveSubject();
+            }
+        });
 
         // AVVIO
         renderAllCards();
+        showAllCards();
         renderCronologia();
+
+        function updateStatus(){
+            setInterval(()=>{
+                document.getElementById('system-time').innerText = new Date().toLocaleTimeString('it-IT');
+            },1000);
+        }
         updateStatus();
     </script>
 </body>
 </html>
+        
+        
+
+       
