@@ -170,7 +170,7 @@
             if (input.value === "2011") {
                 document.getElementById('login-overlay').style.display = 'none';
                 document.getElementById('operator-overlay').style.display = 'flex';
-                input.value = ''; // pulisci per sicurezza
+                input.value = '';
             } else {
                 document.getElementById('error-msg').style.display = 'block';
             }
@@ -220,7 +220,7 @@
             renderAllCards();
         }
 
-        // EDITING INLINE
+        // EDITING INLINE - CORRETTO
         let editingCardId = null;
 
         function toggleEditMode(id) {
@@ -268,37 +268,55 @@
 
             card.querySelector('.identikit-title').insertAdjacentHTML('afterend', editFormHtml);
 
-            document.getElementById(`inline-staff-${id}`).addEventListener('change', function() {
-                document.getElementById(`staff-role-${id}`).style.display = this.checked ? 'block' : 'none';
-            });
+            const staffCheck = document.getElementById(`inline-staff-${id}`);
+            if (staffCheck) {
+                staffCheck.addEventListener('change', function() {
+                    const roleDiv = document.getElementById(`staff-role-${id}`);
+                    if (roleDiv) roleDiv.style.display = this.checked ? 'block' : 'none';
+                });
+            }
 
             const editBtn = card.querySelector('.edit-btn');
-            editBtn.textContent = '💾 SALVA MODIFICHE';
-            editBtn.classList.add('active');
+            if (editBtn) {
+                editBtn.textContent = '💾 SALVA MODIFICHE';
+                editBtn.classList.add('active');
+            }
         }
 
         function saveInlineEdit(id) {
             const subjIndex = soggetti.findIndex(s => s.id === id);
             if (subjIndex === -1) return;
 
-            const nome = document.getElementById(`inline-nome-${id}`).value.trim();
-            if (!nome) { alert("❌ Nome completo obbligatorio!"); return; }
+            const nomeInput = document.getElementById(`inline-nome-${id}`);
+            if (!nomeInput || !nomeInput.value.trim()) {
+                alert("❌ Nome completo obbligatorio!");
+                return;
+            }
+            const nome = nomeInput.value.trim();
 
-            const isStaff = document.getElementById(`inline-staff-${id}`).checked;
-            const ruolo = isStaff ? (document.getElementById(`inline-ruolo-${id}`).value.trim() || 'OPERATORE') : undefined;
+            const staffCheck = document.getElementById(`inline-staff-${id}`);
+            const isStaff = staffCheck ? staffCheck.checked : false;
 
-            const infoText = document.getElementById(`inline-info-${id}`).value.trim();
+            let ruolo = undefined;
+            if (isStaff) {
+                const ruoloInput = document.getElementById(`inline-ruolo-${id}`);
+                ruolo = ruoloInput ? (ruoloInput.value.trim() || 'OPERATORE') : 'OPERATORE';
+            }
+
+            const infoTextarea = document.getElementById(`inline-info-${id}`);
+            const infoText = infoTextarea ? infoTextarea.value.trim() : '';
             const infoObj = {};
             infoText.split('\n').forEach(line => {
                 line = line.trim();
                 if (line && line.includes(':')) {
-                    const [key, ...val] = line.split(':');
+                    const [key, ...valParts] = line.split(':');
                     const k = key.trim().toUpperCase();
-                    if (k) infoObj[k] = val.join(':').trim();
+                    if (k) infoObj[k] = valParts.join(':').trim();
                 }
             });
 
-            const doc = document.getElementById(`inline-doc-${id}`).value.trim();
+            const docTextarea = document.getElementById(`inline-doc-${id}`);
+            const doc = docTextarea ? docTextarea.value.trim() : '';
 
             soggetti[subjIndex] = {
                 ...soggetti[subjIndex],
@@ -309,9 +327,11 @@
                 doc: doc || undefined
             };
 
-            saveSoggetti();
+            // RESET STATO PRIMA DEL SALVATAGGIO
             editingCardId = null;
-            alert("✅ Modifiche salvate");
+
+            saveSoggetti();
+            alert("✅ Modifiche salvate correttamente.");
         }
 
         function cancelInlineEdit(id) {
@@ -320,6 +340,9 @@
         }
 
         function renderAllCards() {
+            // Sicurezza: forza uscita da modalità edit
+            editingCardId = null;
+
             const container = document.getElementById('cards-container');
             container.innerHTML = '';
             soggetti.forEach(s => {
